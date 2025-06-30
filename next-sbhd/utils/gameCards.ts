@@ -11,7 +11,11 @@ export const GAME_CARDS = {
     "The Family Therapist", "The Secret Keeper", "The Money Manager", "The Party Planner",
     "The Tech Support", "The Emergency Contact", "The Voice of Reason", "The Chaos Agent",
     "Professional Food Critic", "Part-Time Psychic", "Retired Spy", "Aspiring Influencer",
-    "The Family Historian", "The Designated Driver", "The Wedding Crasher", "The Funeral Director"
+    "The Family Historian", "The Designated Driver", "The Wedding Crasher", "The Funeral Director",
+    "Professional Line-Waiter", "Escaped Mime", "Competitive Eater", "Fortune Cookie Writer",
+    "Professional Netflix Binger", "Bigfoot Hunter", "Retirement Home Entertainer", "Craft Beer Snob",
+    "The Family Gossip", "Amateur Magician", "Extreme Couponer", "Parallel Parker Extraordinaire",
+    "Social Media Stalker", "Professional Procrastinator", "The Family Photographer", "Karaoke Champion"
   ],
   relationship: [
     "Beloved Grandchild", "Favorite Niece/Nephew", "Loyal Spouse", "Devoted Child",
@@ -25,7 +29,11 @@ export const GAME_CARDS = {
     "Their Life Coach", "Their Yoga Instructor", "Their Barista", "Their Landlord/Tenant",
     "Their Accountant", "Their Hair Stylist", "Their Personal Trainer", "Their Therapist",
     "Their Dentist", "Their Mechanic", "Their Delivery Person", "Their Dog Walker",
-    "Their Social Media Manager", "Their Travel Agent", "Their Wedding Planner", "Their Divorce Lawyer"
+    "Their Social Media Manager", "Their Travel Agent", "Their Wedding Planner", "Their Divorce Lawyer",
+    "Their Cryptocurrency Advisor", "Their Escape Room Partner", "Their Conspiracy Theory Buddy", "Their Karaoke Duet Partner",
+    "Their Online Gaming Teammate", "Their Parking Ticket Appeal Writer", "Their Plant Babysitter", "Their Midnight Snack Accomplice",
+    "Their Excuse Generator", "Their Backup Singer", "Their Emergency Pizza Contact", "Their Professional Hugger",
+    "Their Meme Supplier", "Their Bad Decision Enabler", "Their Reality TV Discussion Partner", "Their Midnight Philosopher"
   ],
   backstory: [
     "I was there when they took their first steps", "I helped them through their divorce",
@@ -55,7 +63,13 @@ export const GAME_CARDS = {
     "I helped them learn to parallel park", "I was their fake reference for jobs", "I know they're afraid of butterflies",
     "I helped them return embarrassing purchases", "I was their wingperson at speed dating", "I know they talk to their plants",
     "I helped them avoid their ex at the grocery store", "I was their accomplice in revenge pranks", "I know they still watch cartoons",
-    "I helped them practice asking for raises", "I was their designated social media stalker", "I know they cry at commercials"
+    "I helped them practice asking for raises", "I was their designated social media stalker", "I know they cry at commercials",
+    "I taught them their signature dance move", "I was their 3 AM crisis hotline", "I helped them escape a bad haircut",
+    "I know they practiced conversations in the mirror", "I was their partner in midnight snack raids", "I helped them avoid spoilers for their favorite show",
+    "I know they once got lost in their own neighborhood", "I was their personal Wikipedia for random facts", "I helped them assemble IKEA furniture without crying",
+    "I know they secretly love pineapple on pizza", "I was their voice of reason during shopping sprees", "I helped them master the art of procrastination",
+    "I know they keep a lucky penny in their shoe", "I was their co-conspirator in avoiding phone calls", "I helped them perfect their resting face",
+    "I know they practice acceptance speeches in the shower", "I was their excuse for canceling plans last minute", "I helped them become a professional blanket hog"
   ],
   objection: [
     "OBJECTION: That's hearsay!", "OBJECTION: Irrelevant to the will!",
@@ -76,39 +90,51 @@ export const GAME_CARDS = {
     "OBJECTION: You're clearly biased!", "OBJECTION: That's circumstantial at best!", "OBJECTION: You're reaching!",
     "OBJECTION: That's not what the autopsy says!", "OBJECTION: The timeline doesn't add up!", "OBJECTION: You have no witnesses!",
     "OBJECTION: That's just your opinion!", "OBJECTION: You're being dramatic!", "OBJECTION: That's not legally binding!",
-    "OBJECTION: You're confusing correlation with causation!", "OBJECTION: That's ancient history!", "OBJECTION: Prove it!"
+    "OBJECTION: You're confusing correlation with causation!", "OBJECTION: That's ancient history!", "OBJECTION: Prove it!",
+    "OBJECTION: Your WiFi password expired!", "OBJECTION: That's not how physics works!", "OBJECTION: You're thinking of someone else!",
+    "OBJECTION: That's clearly photoshopped!", "OBJECTION: You're in the wrong zoom call!", "OBJECTION: That's not even your final form!",
+    "OBJECTION: Your Spotify is showing!", "OBJECTION: That's sus!", "OBJECTION: Citation needed!",
+    "OBJECTION: You're on mute!", "OBJECTION: Wrong group chat!", "OBJECTION: That's so last Tuesday!",
+    "OBJECTION: You need better headphones!", "OBJECTION: That's not how memes work!", "OBJECTION: Your camera is off!"
   ]
 };
 
 export const DESI_GAME_CARDS = {
   identity: [
-    "Ghar ka Buzurg (Family Elder)", "Ghar ka Kala Bhed (Black Sheep)", "Mummy ka Ladla/Ladli (Mom's Favorite)", "Beech wala Bachha (Middle Child)",
-    "Ghar ka Rebel (Family Rebel)", "Padhai mein Tez (The Studious One)", "Sabse Chota (Youngest)", "Ghar ka Badmaash (Troublemaker)",
-    "Zimmedaar wala (Responsible One)", "Ghar ka Pagal (Wild One)", "Shaanti banane wala (Peacemaker)", "Drama Queen/King",
-    "Ghar ka Einstein", "Khel mein Champion", "Artist wala", "Kaam ka Keeda (Workaholic)",
-    "Bollywood ka Deewana", "Cricket ka Expert", "Cooking Master", "Gossip ki Rani/Raja",
-    "Rishta Jodne wala (Matchmaker)", "Ghar ka Doctor", "Pandit/Maulvi", "Ghar ka Comedian",
-    "Shaadi-Byah ka Expert", "Property Dealer", "Tuition Teacher", "Ghar ka Photographer",
-    "WhatsApp Forward King/Queen", "Ghar ka Mechanic", "Sabzi Mandi ka Raja", "Ghar ka Politician"
+    "Ghar ka Buzurg", "Ghar ka Kala Bhed", "Mummy ka Ladla/Ladli", "Beech wala Bachha",
+    "Ghar ka Rebel", "Padhai mein Tez", "Sabse Chota", "Ghar ka Badmaash",
+    "Zimmedaar wala", "Ghar ka Pagal", "Shaanti banane wala", "Drama Rani/Raja",
+    "Ghar ka Einstein", "Khel mein Champion", "Artist wala", "Kaam ka Keeda",
+    "Bollywood ka Deewana", "Cricket ka Expert", "Khaana Pakane wala Ustaad", "Gossip ki Rani/Raja",
+    "Rishta Jodne wala", "Ghar ka Vaid", "Pandit/Maulvi Sahab", "Ghar ka Joker",
+    "Shaadi-Byah ka Maahir", "Zameen-Jaayedaad wala", "Tuition Master", "Ghar ka Photographer",
+    "WhatsApp Forward Raja/Rani", "Gaadi Theek karne wala", "Sabzi Mandi ka Malik", "Ghar ka Neta",
+    "Jugaad ka Badshah", "Roz Ka Soap Opera Dekhne wala", "Paanwala", "Auto Rickshaw Driver",
+    "Mehendi Lagane wala", "Qawwali ka Ustaad", "Kite Flying Champion", "Gully Cricket ka Hero",
+    "Tambola ka Raja", "Ludo Champion", "Chai ki Dukaan wala", "Mithai ka Thaanedar",
+    "Baraat mein Naachne wala", "Antakshari ka Champion", "Bollywood Dance Teacher", "Local Train Expert"
   ],
   relationship: [
-    "Pyara Pota/Poti (Beloved Grandchild)", "Favorite Bhatija/Bhatiji (Nephew/Niece)", "Wafadar Biwi/Shohar (Loyal Spouse)", "Neki wala Beta/Beti (Good Child)",
-    "Bachpan ka Dost (Childhood Friend)", "Business Partner", "Seva karne wala (Caregiver)", "Bagal wala Padosi (Next-door Neighbor)",
-    "Purana Dushman jo Dost ban gaya", "Chhupa hua Aashiq (Secret Lover)", "Dharm Beta/Beti (Godchild)", "Shagird (Student)",
-    "Khoye hue Rishtedaar", "Ghar ka Vaid/Hakim", "Peer Sahab/Pandit ji", "Daaru Peene ka Saathi",
-    "Parol Officer", "Unka Iguana marne wala", "Ola/Uber Driver", "WiFi Password jaanne wala",
-    "Dawai dene wala (Medicine Dealer)", "Fake ID banane wala", "Hansi dilane wala", "Peecha karne wala (Stalker)",
-    "Sharmnaak Dance Partner", "Dushman", "Khaali Dost (Imaginary Friend)", "Khana taste karne wala",
-    "Dil ki baat samjhane wala", "Khat likhne wala", "Maatam karne wala", "Bura Bhai/Behen (Evil Twin)",
-    "Life Coach", "Yoga Teacher", "Chai wala", "Makaan Malik/Kiraaydaar",
-    "Hisaab-Kitaab wala", "Nai (Barber)", "Gym Trainer", "Paagal Doctor (Therapist)",
-    "Daant ka Doctor", "Gaadi Theek karne wala", "Saamaan laane wala", "Kutta ghumane wala",
-    "Facebook chalane wala", "Safar arrange karne wala", "Shaadi karvane wala", "Talaaq ka Vakeel"
+    "Pyara Pota/Poti", "Favorite Bhatija/Bhatiji", "Wafadar Biwi/Shohar", "Neki wala Beta/Beti",
+    "Bachpan ka Dost", "Dhanda mein Saajhi", "Seva karne wala", "Bagal wala Padosi",
+    "Purana Dushman jo Dost ban gaya", "Chhupa hua Aashiq", "Dharm Beta/Beti", "Chela/Shagird",
+    "Khoye hue Rishtedaar", "Ghar ka Vaid/Hakim", "Peer Sahab/Pandit ji", "Daru Peene ka Yaar",
+    "Thulla", "Unka Tota marne wala", "Rickshaw/Taxi wala", "WiFi ka Raaz jaanne wala",
+    "Dawai dene wala", "Duplicate Card banane wala", "Hasaane wala", "Peecha karne wala",
+    "Sharmnaak Naach Partner", "Puraana Dushman", "Hawai Dost", "Khaana Check karne wala",
+    "Dil ki baat samjhane wala", "Chithi likhne wala", "Maatam manaane wala", "Bura Twin",
+    "Zindagi Sudhaarne wala", "Yoga Sikhane wala", "Chaiwala", "Makaan Malik/Kiraaydaar",
+    "Paisa Ginne wala", "Hajjam", "Kasrat Trainer", "Dimagh ka Doctor",
+    "Daant ka Doctor", "Mechanic", "Saamaan Delivery wala", "Kutta Ghuma ne wala",
+    "WhatsApp Chalane wala", "Tour Package wala", "Pandit ji", "Vakeel Sahab",
+    "Kirana Store wala", "Building ka Watchman", "Tiffin Service wala", "Sabzi wala",
+    "Doodh wala", "Cable TV wala", "Electrician", "Plumber Bhai",
+    "Coaching Class Teacher", "Marriage Bureau wala", "Astrologer", "Compounder"
   ],
   backstory: [
     "Main unke pehle kadam ke saath tha", "Talaaq mein madad ki thi",
-    "Unka secret shauk jaanta tha", "Main unka emergency contact tha",
-    "Mere paas unki sharmnaak photos hain", "Pata hai paisa kahan chhupaya hai",
+    "Unka chhupa hua shauk jaanta tha", "Main unka emergency contact tha",
+    "Mere paas unki sharmnaak tasveerain hain", "Pata hai paisa kahan chhupaya hai",
     "Main unka partner in crime tha", "Beemar hone par seva ki thi",
     "Kabhi birthday nahi bhula", "Ek baar jaan bachayi thi",
     "Unka adhura kaam pura kiya", "Mere paas unki diary hai",
@@ -116,45 +142,54 @@ export const DESI_GAME_CARDS = {
     "Asli umar pata hai", "Unka alibi tha",
     "Sab kuch sikhaya tha", "Sabse bada disappointment tha",
     "Sirf main samajhta tha", "Secret recipe pata hai",
-    "Getaway driver tha", "Secret family ke baare mein jaanta hun",
+    "Bhagaane wala driver tha", "Chhupi hui family ke baare mein jaanta hun",
     "Raaz ki baat karte the", "Pehle bhi maut ka natak kiya tha",
     "Jua khelne ka partner tha", "Asli naam pata hai",
-    "Wingman/wingwoman tha", "Saboot chupane mein madad ki",
+    "Rishtey jodne mein madad karta tha", "Saboot chupane mein madad ki",
     "Khana taste karta tha", "Saare passwords maloom hain",
-    "Ghar mein unka life-size photo hai", "Kabhi Disneyland nahi gaya", "Facebook pe stalk kiya left wale ko",
-    "Abhi bhi unka toothbrush pada hai", "Twerk karna sikhaya tha", "Cryptocurrency advisor tha",
-    "OnlyFans shuru karne mein madad ki", "Jaanta hun wo sach mein mare nahi", "Browser history pata hai",
-    "Family events mein fake boyfriend/girlfriend tha", "Online catfish karne mein madad ki", "Netflix password pata hai",
-    "Pranks mein saath dete the", "Belly button lint ka collection hai", "Dog food khaya tha pata hai",
-    "Mime convention se bhaagne mein madad ki", "Pyramid scheme mein partner the", "Secret TikTok account pata hai",
-    "Medical condition fake karne mein madad ki", "Instagram photographer tha", "Furry costume ke baare mein jaanta hun",
-    "Vegan lifestyle chupane mein madad ki", "Amazon packages receive karta tha", "Raat mein light jalake sota hai pata hai",
-    "Karaoke practice karvaya", "Party se nikalne ka bahana tha", "Rubber ducks collect karta hai pata hai",
-    "Parallel parking sikhaya", "Job ke liye fake reference tha", "Titliyon se darta hai pata hai",
-    "Sharmnaak purchases return karne mein madad ki", "Speed dating mein wingperson tha", "Paudhon se baat karta hai pata hai",
-    "Ex se bachne mein madad ki grocery store mein", "Revenge pranks mein accomplice tha", "Cartoons dekhta hai abhi bhi pata hai",
-    "Salary badhane ki practice karvayi", "Social media stalker tha", "Ad dekh kar rota hai pata hai"
+    "Ghar mein unka bada photo lagaya hai", "Kabhi Mumbai nahi gaya", "WhatsApp pe left waale ko stalk kiya",
+    "Abhi bhi unka toothbrush pada hai", "Bhangra sikhaya tha", "Share market advisor tha",
+    "YouTube channel banane mein madad ki", "Jaanta hun wo sach mein mare nahi", "Browser history pata hai",
+    "Family functions mein fake partner banke gaya", "Online fake profile banane mein madad ki", "Hotstar password pata hai",
+    "Mazaak mein saath dete the", "Kaan ki mael ka collection hai", "Kutte ka khaana khaya tha pata hai",
+    "Sadak natak se bhaagne mein madad ki", "Multi-level marketing mein partner the", "Secret Instagram account pata hai",
+    "Beemar hone ka natak karne mein madad ki", "Photo kheenchta tha", "Fancy dress ke baare mein jaanta hun",
+    "Vegetarian hone ka natak chupane mein madad ki", "Online orders receive karta tha", "Raat mein light jalake sota hai pata hai",
+    "Gaana gaane ki practice karvayi", "Party se nikalne ka bahana tha", "Plastic ke toys collect karta hai pata hai",
+    "Gaadi park karna sikhaya", "Job ke liye jhootha reference diya", "Choti makhi se darta hai pata hai",
+    "Galat khareedaari wapas karne mein madad ki", "Rishta dhundhne mein saath gaya", "Paudhon se baat karta hai pata hai",
+    "Ex se bachne mein madad ki bazaar mein", "Badla lene mein accomplice tha", "Cartoon dekhta hai abhi bhi pata hai",
+    "Salary badhane ki practice karvayi", "Social media pe stalking karta tha", "Ad dekh kar rota hai pata hai",
+    "Cricket khelna sikhaya tha", "Raat ko chai peene ka saathi tha", "Unke saath queue mein khada hota tha",
+    "Mobile recharge karwata tha", "Auto mein saath baithta tha", "Gol gappe khilane le jaata tha",
+    "Bollywood gossip share karta tha", "WhatsApp forwards bhejta tha", "Aam aam cartoon dekhta tha unke saath",
+    "Local train mein jagah bachata tha", "Dabba party organize karta tha", "Paan khaane ka partner tha",
+    "Cricket match mein saath betting karta tha", "Roadside food try karne ka saathi tha", "Bargaining karne mein madad karta tha"
   ],
   objection: [
     "AITRAZ: Ye jhooth hai!", "AITRAZ: Will mein aisa kuch nahi!",
-    "AITRAZ: Qasam khake jhooth bol rahe ho!", "AITRAZ: Inheritance aise nahi milti!",
+    "AITRAZ: Qasam khake jhooth bol rahe ho!", "AITRAZ: Warasat aise nahi milti!",
     "AITRAZ: Unhone mujhe kuch aur kaha tha!", "AITRAZ: Mere paas ulta saboot hai!",
     "AITRAZ: Ye gair-qanooni hai!", "AITRAZ: Sabit nahi kar sakte!",
     "AITRAZ: Will mein kuch aur likha hai!", "AITRAZ: Unki marzi ke khilaf hai!",
     "AITRAZ: Sach ko tod-marod rahe ho!", "AITRAZ: Ye sirf andaza hai!",
     "AITRAZ: Main waha tha, aisa nahi hua!", "AITRAZ: Tumhara koi haq nahi!",
-    "AITRAZ: Ye saboot manzoor nahi!", "AITRAZ: Time limit khatam ho gayi!",
-    "AITRAZ: Accent fake kar rahe ho!", "AITRAZ: Muh mein peanut butter bhara hai!", "AITRAZ: Mera das rupaya dena hai!",
-    "AITRAZ: Ye shabd hi nahi hai!", "AITRAZ: Bana rahe ho!", "AITRAZ: Phone baj raha hai!",
-    "AITRAZ: Paneer ki boo aa rahi!", "AITRAZ: That's what she said!", "AITRAZ: Nashe mein ho!",
-    "AITRAZ: Zip khula hai!", "AITRAZ: Ye tumhare asli baal nahi!", "AITRAZ: Doodh hazam nahi hota!",
-    "AITRAZ: Abhi bhi mummy ke saath rehte ho!", "AITRAZ: Alag-alag joote pehne ho!", "AITRAZ: Bilkul namumkin!",
-    "AITRAZ: Pant pehenna bhul gaye!", "AITRAZ: Tumhari baat bewakoofi hai!", "AITRAZ: Kisi ne nahi pucha!",
-    "AITRAZ: Rishtedaar bhi nahi ho!", "AITRAZ: Sab yahi kehte hain!", "AITRAZ: Kahani badal rahe ho!",
-    "AITRAZ: Tumhara pakshpaat hai!", "AITRAZ: Ye sirf andaza hai!", "AITRAZ: Bahut door ki baat!",
-    "AITRAZ: Post-mortem mein aisa nahi!", "AITRAZ: Time match nahi kar raha!", "AITRAZ: Koi gawah nahi!",
-    "AITRAZ: Ye sirf tumhari raay hai!", "AITRAZ: Drama kar rahe ho!", "AITRAZ: Qanooni taur pe sahi nahi!",
-    "AITRAZ: Correlation aur causation mein fark hai!", "AITRAZ: Purani baat hai!", "AITRAZ: Sabit karo!"
+    "AITRAZ: Ye saboot manzoor nahi!", "AITRAZ: Waqt khatam ho gaya!",
+    "AITRAZ: Accent nakal kar rahe ho!", "AITRAZ: Muh mein aloo paratha bhara hai!", "AITRAZ: Mera sau rupaya dena hai!",
+    "AITRAZ: Ye shabd hi galat hai!", "AITRAZ: Banawati baat!", "AITRAZ: Mobile baj raha hai!",
+    "AITRAZ: Pyaaz ki boo aa rahi!", "AITRAZ: Yahi toh kaha tha!", "AITRAZ: Nashe mein lag rahe ho!",
+    "AITRAZ: Button khula hai!", "AITRAZ: Ye wig laga rakha hai!", "AITRAZ: Chai digest nahi hoti!",
+    "AITRAZ: Abhi bhi ghar pe rehte ho!", "AITRAZ: Mismatched chappal pehni hai!", "AITRAZ: Bilkul asambhav!",
+    "AITRAZ: Proper dress nahi pehna!", "AITRAZ: Bakwaas baat hai!", "AITRAZ: Kisi ne nahi pucha!",
+    "AITRAZ: Relative bhi nahi ho!", "AITRAZ: Sabka yahi kehna!", "AITRAZ: Story change kar rahe ho!",
+    "AITRAZ: Pakka bias hai!", "AITRAZ: Serf guess work!", "AITRAZ: Bahut zyada stretch!",
+    "AITRAZ: Medical report mein aisa nahi!", "AITRAZ: Timing match nahi kar rahi!", "AITRAZ: Koi witness nahi!",
+    "AITRAZ: Ye bas opinion hai!", "AITRAZ: Overacting kar rahe ho!", "AITRAZ: Legal nahi hai!",
+    "AITRAZ: Logic aur coincidence mein fark hai!", "AITRAZ: Purane zamane ki baat!", "AITRAZ: Proof dikhao!",
+    "AITRAZ: WhatsApp pe forward nahi milta!", "AITRAZ: Google pe check karo!", "AITRAZ: Galat WhatsApp group!",
+    "AITRAZ: Data pack khatam hai!", "AITRAZ: Signal nahi aa raha!", "AITRAZ: WiFi slow hai!",
+    "AITRAZ: Arre yaar kya bol rahe ho!", "AITRAZ: Bilkul bakwaas!", "AITRAZ: Camera on karo!",
+    "AITRAZ: Mic mute hai!", "AITRAZ: Zoom call join karo pehle!", "AITRAZ: Screenshot leke aao!"
   ]
 };
 
@@ -164,8 +199,9 @@ export const DECEASED_NAMES = [
   "Uncle Rex", "Aunt Gertrude", "Great Grandma Agatha", "Uncle Bartholomew",
   "Cousin Moonbeam", "Uncle Bubbles", "Aunt Pickles", "Great Uncle Sparkles",
   "Grandma Chaos", "Cousin Bananas", "Uncle Toot-Toot", "Aunt Giggles",
-  "Great Aunt Prudence", "Uncle Magnificent", "Cousin Whiskers", "Grandpa Disco",
-  "Aunt Spectacular", "Uncle Fabulous", "Great Grandma Sparkle", "Cousin Thunder"
+  "Uncle Magnificent", "Cousin Whiskers", "Grandpa Disco", "Aunt Spectacular",
+  "Uncle Fabulous", "Great Grandma Sparkle", "Cousin Thunder", "Aunt Marmalade",
+  "Uncle Wiggles", "Great Aunt Biscuits", "Cousin Jellybean", "Grandpa Noodles"
 ];
 
 export const DESI_DECEASED_NAMES = [
@@ -173,9 +209,10 @@ export const DESI_DECEASED_NAMES = [
   "Tauji Suresh", "Chachi Sunita", "Nana Rajesh", "Bua Geeta",
   "Mama Vinod", "Mami Rekha", "Parnani Shanti", "Fufa Anil",
   "Cousin Bunty", "Chacha Golu", "Tai Pushpa", "Dada Masterji",
-  "Nani Chaos", "Cousin Chintu", "Mama Toot-Toot", "Chachi Giggly",
-  "Badi Bua Sharda", "Chacha Magnificent", "Cousin Whiskers", "Nana Disco",
-  "Mami Spectacular", "Tauji Fabulous", "Parnani Chamakti", "Cousin Bijli"
+  "Nani Shanti", "Cousin Chintu", "Mama Pintoo", "Chachi Chameli",
+  "Badi Bua Sharda", "Chacha Sitaram", "Cousin Guddu", "Nana Bansi",
+  "Mami Rukhmani", "Tauji Ramkishan", "Parnani Kamla", "Cousin Bittu",
+  "Chacha Babuji", "Bua Radha", "Mama Jagdish", "Dadi Sushila"
 ];
 
 export const DECEASED_ESTATES = [
