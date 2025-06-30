@@ -80,6 +80,84 @@ export const GAME_CARDS = {
   ]
 };
 
+export const DESI_GAME_CARDS = {
+  identity: [
+    "Ghar ka Buzurg (Family Elder)", "Ghar ka Kala Bhed (Black Sheep)", "Mummy ka Ladla/Ladli (Mom's Favorite)", "Beech wala Bachha (Middle Child)",
+    "Ghar ka Rebel (Family Rebel)", "Padhai mein Tez (The Studious One)", "Sabse Chota (Youngest)", "Ghar ka Badmaash (Troublemaker)",
+    "Zimmedaar wala (Responsible One)", "Ghar ka Pagal (Wild One)", "Shaanti banane wala (Peacemaker)", "Drama Queen/King",
+    "Ghar ka Einstein", "Khel mein Champion", "Artist wala", "Kaam ka Keeda (Workaholic)",
+    "Bollywood ka Deewana", "Cricket ka Expert", "Cooking Master", "Gossip ki Rani/Raja",
+    "Rishta Jodne wala (Matchmaker)", "Ghar ka Doctor", "Pandit/Maulvi", "Ghar ka Comedian",
+    "Shaadi-Byah ka Expert", "Property Dealer", "Tuition Teacher", "Ghar ka Photographer",
+    "WhatsApp Forward King/Queen", "Ghar ka Mechanic", "Sabzi Mandi ka Raja", "Ghar ka Politician"
+  ],
+  relationship: [
+    "Pyara Pota/Poti (Beloved Grandchild)", "Favorite Bhatija/Bhatiji (Nephew/Niece)", "Wafadar Biwi/Shohar (Loyal Spouse)", "Neki wala Beta/Beti (Good Child)",
+    "Bachpan ka Dost (Childhood Friend)", "Business Partner", "Seva karne wala (Caregiver)", "Bagal wala Padosi (Next-door Neighbor)",
+    "Purana Dushman jo Dost ban gaya", "Chhupa hua Aashiq (Secret Lover)", "Dharm Beta/Beti (Godchild)", "Shagird (Student)",
+    "Khoye hue Rishtedaar", "Ghar ka Vaid/Hakim", "Peer Sahab/Pandit ji", "Daaru Peene ka Saathi",
+    "Parol Officer", "Unka Iguana marne wala", "Ola/Uber Driver", "WiFi Password jaanne wala",
+    "Dawai dene wala (Medicine Dealer)", "Fake ID banane wala", "Hansi dilane wala", "Peecha karne wala (Stalker)",
+    "Sharmnaak Dance Partner", "Dushman", "Khaali Dost (Imaginary Friend)", "Khana taste karne wala",
+    "Dil ki baat samjhane wala", "Khat likhne wala", "Maatam karne wala", "Bura Bhai/Behen (Evil Twin)",
+    "Life Coach", "Yoga Teacher", "Chai wala", "Makaan Malik/Kiraaydaar",
+    "Hisaab-Kitaab wala", "Nai (Barber)", "Gym Trainer", "Paagal Doctor (Therapist)",
+    "Daant ka Doctor", "Gaadi Theek karne wala", "Saamaan laane wala", "Kutta ghumane wala",
+    "Facebook chalane wala", "Safar arrange karne wala", "Shaadi karvane wala", "Talaaq ka Vakeel"
+  ],
+  backstory: [
+    "Main unke pehle kadam ke saath tha", "Talaaq mein madad ki thi",
+    "Unka secret shauk jaanta tha", "Main unka emergency contact tha",
+    "Mere paas unki sharmnaak photos hain", "Pata hai paisa kahan chhupaya hai",
+    "Main unka partner in crime tha", "Beemar hone par seva ki thi",
+    "Kabhi birthday nahi bhula", "Ek baar jaan bachayi thi",
+    "Unka adhura kaam pura kiya", "Mere paas unki diary hai",
+    "Hamesha designated driver tha", "Tax chori mein madad ki",
+    "Asli umar pata hai", "Unka alibi tha",
+    "Sab kuch sikhaya tha", "Sabse bada disappointment tha",
+    "Sirf main samajhta tha", "Secret recipe pata hai",
+    "Getaway driver tha", "Secret family ke baare mein jaanta hun",
+    "Raaz ki baat karte the", "Pehle bhi maut ka natak kiya tha",
+    "Jua khelne ka partner tha", "Asli naam pata hai",
+    "Wingman/wingwoman tha", "Saboot chupane mein madad ki",
+    "Khana taste karta tha", "Saare passwords maloom hain",
+    "Ghar mein unka life-size photo hai", "Kabhi Disneyland nahi gaya", "Facebook pe stalk kiya left wale ko",
+    "Abhi bhi unka toothbrush pada hai", "Twerk karna sikhaya tha", "Cryptocurrency advisor tha",
+    "OnlyFans shuru karne mein madad ki", "Jaanta hun wo sach mein mare nahi", "Browser history pata hai",
+    "Family events mein fake boyfriend/girlfriend tha", "Online catfish karne mein madad ki", "Netflix password pata hai",
+    "Pranks mein saath dete the", "Belly button lint ka collection hai", "Dog food khaya tha pata hai",
+    "Mime convention se bhaagne mein madad ki", "Pyramid scheme mein partner the", "Secret TikTok account pata hai",
+    "Medical condition fake karne mein madad ki", "Instagram photographer tha", "Furry costume ke baare mein jaanta hun",
+    "Vegan lifestyle chupane mein madad ki", "Amazon packages receive karta tha", "Raat mein light jalake sota hai pata hai",
+    "Karaoke practice karvaya", "Party se nikalne ka bahana tha", "Rubber ducks collect karta hai pata hai",
+    "Parallel parking sikhaya", "Job ke liye fake reference tha", "Titliyon se darta hai pata hai",
+    "Sharmnaak purchases return karne mein madad ki", "Speed dating mein wingperson tha", "Paudhon se baat karta hai pata hai",
+    "Ex se bachne mein madad ki grocery store mein", "Revenge pranks mein accomplice tha", "Cartoons dekhta hai abhi bhi pata hai",
+    "Salary badhane ki practice karvayi", "Social media stalker tha", "Ad dekh kar rota hai pata hai"
+  ],
+  objection: [
+    "AITRAZ: Ye jhooth hai!", "AITRAZ: Will mein aisa kuch nahi!",
+    "AITRAZ: Qasam khake jhooth bol rahe ho!", "AITRAZ: Inheritance aise nahi milti!",
+    "AITRAZ: Unhone mujhe kuch aur kaha tha!", "AITRAZ: Mere paas ulta saboot hai!",
+    "AITRAZ: Ye gair-qanooni hai!", "AITRAZ: Sabit nahi kar sakte!",
+    "AITRAZ: Will mein kuch aur likha hai!", "AITRAZ: Unki marzi ke khilaf hai!",
+    "AITRAZ: Sach ko tod-marod rahe ho!", "AITRAZ: Ye sirf andaza hai!",
+    "AITRAZ: Main waha tha, aisa nahi hua!", "AITRAZ: Tumhara koi haq nahi!",
+    "AITRAZ: Ye saboot manzoor nahi!", "AITRAZ: Time limit khatam ho gayi!",
+    "AITRAZ: Accent fake kar rahe ho!", "AITRAZ: Muh mein peanut butter bhara hai!", "AITRAZ: Mera das rupaya dena hai!",
+    "AITRAZ: Ye shabd hi nahi hai!", "AITRAZ: Bana rahe ho!", "AITRAZ: Phone baj raha hai!",
+    "AITRAZ: Paneer ki boo aa rahi!", "AITRAZ: That's what she said!", "AITRAZ: Nashe mein ho!",
+    "AITRAZ: Zip khula hai!", "AITRAZ: Ye tumhare asli baal nahi!", "AITRAZ: Doodh hazam nahi hota!",
+    "AITRAZ: Abhi bhi mummy ke saath rehte ho!", "AITRAZ: Alag-alag joote pehne ho!", "AITRAZ: Bilkul namumkin!",
+    "AITRAZ: Pant pehenna bhul gaye!", "AITRAZ: Tumhari baat bewakoofi hai!", "AITRAZ: Kisi ne nahi pucha!",
+    "AITRAZ: Rishtedaar bhi nahi ho!", "AITRAZ: Sab yahi kehte hain!", "AITRAZ: Kahani badal rahe ho!",
+    "AITRAZ: Tumhara pakshpaat hai!", "AITRAZ: Ye sirf andaza hai!", "AITRAZ: Bahut door ki baat!",
+    "AITRAZ: Post-mortem mein aisa nahi!", "AITRAZ: Time match nahi kar raha!", "AITRAZ: Koi gawah nahi!",
+    "AITRAZ: Ye sirf tumhari raay hai!", "AITRAZ: Drama kar rahe ho!", "AITRAZ: Qanooni taur pe sahi nahi!",
+    "AITRAZ: Correlation aur causation mein fark hai!", "AITRAZ: Purani baat hai!", "AITRAZ: Sabit karo!"
+  ]
+};
+
 export const DECEASED_NAMES = [
   "Great Aunt Mildred", "Uncle Horatio", "Grandma Prudence", "Cousin Mortimer",
   "Great Uncle Reginald", "Aunt Cordelia", "Grandpa Ezekiel", "Cousin Beatrice",
@@ -88,6 +166,16 @@ export const DECEASED_NAMES = [
   "Grandma Chaos", "Cousin Bananas", "Uncle Toot-Toot", "Aunt Giggles",
   "Great Aunt Prudence", "Uncle Magnificent", "Cousin Whiskers", "Grandpa Disco",
   "Aunt Spectacular", "Uncle Fabulous", "Great Grandma Sparkle", "Cousin Thunder"
+];
+
+export const DESI_DECEASED_NAMES = [
+  "Badi Nani Kamala", "Chacha Ramesh", "Dadi Savitri", "Cousin Pappu",
+  "Tauji Suresh", "Chachi Sunita", "Nana Rajesh", "Bua Geeta",
+  "Mama Vinod", "Mami Rekha", "Parnani Shanti", "Fufa Anil",
+  "Cousin Bunty", "Chacha Golu", "Tai Pushpa", "Dada Masterji",
+  "Nani Chaos", "Cousin Chintu", "Mama Toot-Toot", "Chachi Giggly",
+  "Badi Bua Sharda", "Chacha Magnificent", "Cousin Whiskers", "Nana Disco",
+  "Mami Spectacular", "Tauji Fabulous", "Parnani Chamakti", "Cousin Bijli"
 ];
 
 export const DECEASED_ESTATES = [
@@ -121,21 +209,56 @@ export const DECEASED_ESTATES = [
   "Haunted bed and breakfast with actual ghosts as staff"
 ];
 
+export const DESI_DECEASED_ESTATES = [
+  "Purani haveli aur antique bartan ka collection",
+  "Truck ki dealership aur secret biryani recipe",
+  "Billi ka ashram aur rum cake ki recipe",
+  "Purane garden gnomes aur bhootiya greenhouse",
+  "Old age home aur purane postcards ka collection",
+  "Mysterious band kamra aur purani chaabiyan",
+  "Bada library aur ek tota jo raaz jaanta hai",
+  "Antique shop aur mohalle ki gossip diary",
+  "Food truck empire aur mirch masala collection",
+  "Chhoda hua mela aur future batane ka business",
+  "Secret underground bunker aur conspiracy theories",
+  "Haldiram franchise aur Gerald naam ka llama",
+  "10,000 rubber ducks aur ek khaai",
+  "Bhootiya mini golf course aur time machine (kharab)",
+  "Wrestling ring aur cape collection",
+  "Paneer factory aur cheese jokes ki diary",
+  "Bigfoot research center aur dhundli photos",
+  "Indoor water park aur pool noodles collection",
+  "Escape room business aur trust issues",
+  "Karaoke bar aur wig collection",
+  "Cryptocurrency mining aur meme collection",
+  "Purana arcade aur Pac-Man ka high score",
+  "Titli sanctuary aur titliyon ka dar",
+  "Jadugar ka saamaan aur asli jaadu ki chhadi",
+  "Teen dimensions mein time-share",
+  "Conspiracy theories aur aliens exist karne ka proof",
+  "Underground disco aur platform shoes collection",
+  "Bhootiya bed & breakfast with real ghosts as staff"
+];
+
 export type CardType = 'identity' | 'relationship' | 'backstory' | 'objection';
 
-export function drawRandomCard(type: CardType, usedCards: string[] = []): string {
-  const availableCards = GAME_CARDS[type].filter(card => !usedCards.includes(card));
+export function drawRandomCard(type: CardType, usedCards: string[] = [], isDesi: boolean = false): string {
+  const cardSet = isDesi ? DESI_GAME_CARDS : GAME_CARDS;
+  const availableCards = cardSet[type].filter(card => !usedCards.includes(card));
   if (availableCards.length === 0) {
     // If all cards are used, reset and use all cards again
-    return GAME_CARDS[type][Math.floor(Math.random() * GAME_CARDS[type].length)];
+    return cardSet[type][Math.floor(Math.random() * cardSet[type].length)];
   }
   return availableCards[Math.floor(Math.random() * availableCards.length)];
 }
 
-export function generateDeceased() {
-  const name = DECEASED_NAMES[Math.floor(Math.random() * DECEASED_NAMES.length)];
-  const identity = drawRandomCard('identity');
-  const estate = DECEASED_ESTATES[Math.floor(Math.random() * DECEASED_ESTATES.length)];
+export function generateDeceased(isDesi: boolean = false) {
+  const nameSet = isDesi ? DESI_DECEASED_NAMES : DECEASED_NAMES;
+  const estateSet = isDesi ? DESI_DECEASED_ESTATES : DECEASED_ESTATES;
+  
+  const name = nameSet[Math.floor(Math.random() * nameSet.length)];
+  const identity = drawRandomCard('identity', [], isDesi);
+  const estate = estateSet[Math.floor(Math.random() * estateSet.length)];
   
   return { name, identity, estate };
 } 

@@ -386,12 +386,48 @@ export default function GamePage() {
           <div className="text-xl text-amber-100 mb-4">
             Game Code: <span className="font-mono text-2xl text-amber-300">{gameState.game_code}</span>
           </div>
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-4 flex-wrap">
             <button
               onClick={() => setShowRules(!showRules)}
               className="bg-amber-700 hover:bg-amber-600 text-white px-4 py-2 rounded-lg transition-colors"
             >
               {showRules ? 'Hide Rules' : 'Show Rules'}
+            </button>
+            <button
+              onClick={() => {
+                const shareUrl = `${window.location.origin}/join?code=${gameState.game_code}`;
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                  // Show success feedback
+                  const button = document.activeElement as HTMLButtonElement;
+                  const originalText = button.textContent;
+                  button.textContent = 'Copied!';
+                  button.classList.add('bg-green-600');
+                  setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('bg-green-600');
+                  }, 2000);
+                }).catch(() => {
+                  // Fallback for older browsers
+                  const textArea = document.createElement('textarea');
+                  textArea.value = shareUrl;
+                  document.body.appendChild(textArea);
+                  textArea.select();
+                  document.execCommand('copy');
+                  document.body.removeChild(textArea);
+                  
+                  const button = document.activeElement as HTMLButtonElement;
+                  const originalText = button.textContent;
+                  button.textContent = 'Copied!';
+                  button.classList.add('bg-green-600');
+                  setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('bg-green-600');
+                  }, 2000);
+                });
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              📋 Copy Share Link
             </button>
             <button
               onClick={() => router.push('/')}
@@ -444,6 +480,11 @@ export default function GamePage() {
                 <div className="text-amber-100">
                   <strong>Estate:</strong> {gameState.deceased_estate}
                 </div>
+                {gameState.game_settings?.mode === 'desi' && (
+                  <div className="text-xs text-green-300 mt-2">
+                    🏠 Desi Mode Active
+                  </div>
+                )}
               </div>
             </div>
 

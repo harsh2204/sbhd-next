@@ -11,6 +11,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showRules, setShowRules] = useState(false);
+  const [gameMode, setGameMode] = useState<'english' | 'desi'>('english');
   const router = useRouter();
 
   const handleCreateGame = async () => {
@@ -23,7 +24,7 @@ export default function HomePage() {
     setError('');
 
     try {
-      const result = await createGame(hostName.trim());
+      const result = await createGame(hostName.trim(), gameMode);
       if (result) {
         // Store player ID in localStorage
         localStorage.setItem('playerId', result.playerId);
@@ -133,6 +134,43 @@ export default function HomePage() {
                   maxLength={50}
                 />
               </div>
+              
+              <div>
+                <label className="block text-amber-200 font-semibold mb-2">
+                  Game Mode
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setGameMode('english')}
+                    className={`px-4 py-3 rounded-lg border-2 transition-colors ${
+                      gameMode === 'english'
+                        ? 'border-amber-400 bg-amber-900/30 text-amber-200'
+                        : 'border-amber-500/30 bg-slate-800 text-amber-100 hover:border-amber-400/50'
+                    }`}
+                  >
+                    <div className="font-semibold">English</div>
+                    <div className="text-sm opacity-80">Original cards</div>
+                  </button>
+                  <button
+                    onClick={() => setGameMode('desi')}
+                    className={`px-4 py-3 rounded-lg border-2 transition-colors ${
+                      gameMode === 'desi'
+                        ? 'border-amber-400 bg-amber-900/30 text-amber-200'
+                        : 'border-amber-500/30 bg-slate-800 text-amber-100 hover:border-amber-400/50'
+                    }`}
+                  >
+                    <div className="font-semibold">Desi Mode</div>
+                    <div className="text-sm opacity-80">Family-friendly</div>
+                  </button>
+                </div>
+                <div className="text-xs text-amber-300/70 mt-2">
+                  {gameMode === 'desi' 
+                    ? 'Hindi/Urdu cards with familiar family situations' 
+                    : 'Original English cards with Western references'
+                  }
+                </div>
+              </div>
+              
               <button
                 onClick={handleCreateGame}
                 disabled={loading || !hostName.trim()}
@@ -182,6 +220,15 @@ export default function HomePage() {
               >
                 {loading ? 'Joining...' : 'Join Game'}
               </button>
+              
+              <div className="text-center mt-4">
+                <button
+                  onClick={() => router.push('/join')}
+                  className="text-purple-300 hover:text-purple-200 underline text-sm"
+                >
+                  Use dedicated join page →
+                </button>
+              </div>
             </div>
           </div>
         </div>
