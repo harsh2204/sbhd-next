@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Somebody Has Died - Estate Keeper's Console</title>
+    <style>
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: linear-gradient(135deg, #2c1810, #4a2c2a);
+            color: #f4f1de;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        h1 {
+            text-align: center;
+            color: #d4af37;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+        }
+        .setup-section, .game-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #d4af37;
+        }
+        .card-deck {
+            background: rgba(0,0,0,0.4);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid;
+        }
+        .identity { border-color: #4285f4; }
+        .relationship { border-color: #ea4335; }
+        .backstory { border-color: #34a853; }
+        .objection { border-color: #000; }
+        
+        button {
+            background: linear-gradient(45deg, #d4af37, #b8941f);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+        }
+        .card-display {
+            background: rgba(255,255,255,0.9);
+            color: #000;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 5px solid;
+            font-weight: bold;
+        }
+        .player-hands {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .player-hand {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #d4af37;
+        }
+        .scoring {
+            background: rgba(212, 175, 55, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .deceased-info {
+            background: rgba(0,0,0,0.5);
+            border: 3px solid #d4af37;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .rules-summary {
+            font-size: 0.9em;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚰️ SOMEBODY HAS DIED ⚰️</h1>
+        <div class="rules-summary">
+            <strong>Estate Keeper's Role:</strong> You manage the game, hold objection cards, define the deceased, and judge inheritance arguments. Award 4 points for best argument down to 1 point for worst each round.
+        </div>
+
+        <div class="setup-section">
+            <h2>🎮 Game Setup</h2>
+            <p><strong>Setup Instructions:</strong></p>
+            <ol>
+                <li>Separate cards by color: Identity (Blue), Relationship (Red), Backstory (Green), Objection (Black)</li>
+                <li>Place Backstory cards as center deck</li>
+                <li>You (Estate Keeper) get all Objection cards + 1 Identity card (for the deceased)</li>
+                <li>Each player gets: 1 Identity + 1 Relationship + 2 Backstory cards</li>
+            </ol>
+            
+            <div class="card-deck identity">
+                <h3>🔵 Identity Cards (Blue) - Who You Are</h3>
+                <button onclick="drawCard('identity')">Draw Identity Card</button>
+                <div id="identity-drawn"></div>
+            </div>
+
+            <div class="card-deck relationship">
+                <h3>🔴 Relationship Cards (Red) - Your Connection</h3>
+                <button onclick="drawCard('relationship')">Draw Relationship Card</button>
+                <div id="relationship-drawn"></div>
+            </div>
+
+            <div class="card-deck backstory">
+                <h3>🟢 Backstory Cards (Green) - Your History</h3>
+                <button onclick="drawCard('backstory')">Draw Backstory Card</button>
+                <div id="backstory-drawn"></div>
+            </div>
+
+            <div class="card-deck objection">
+                <h3>⚫ Objection Cards (Black) - Estate Keeper Only</h3>
+                <button onclick="drawCard('objection')">Draw Objection Card</button>
+                <div id="objection-drawn"></div>
+            </div>
+        </div>
+
+        <div class="deceased-info">
+            <h2>💀 THE DECEASED 💀</h2>
+            <button onclick="generateDeceased()">Generate Random Deceased</button>
+            <div id="deceased-display">Click above to reveal who died and their estate...</div>
+        </div>
+
+        <div class="game-section">
+            <h2>🎭 Player Management</h2>
+            <div style="margin: 20px 0;">
+                <label for="player-count" style="font-size: 1.1em; margin-right: 10px;">Number of Players:</label>
+                <select id="player-count" onchange="generatePlayerNameInputs()" style="padding: 8px; font-size: 1em; border-radius: 5px; background: #333; color: #fff; border: 2px solid #d4af37;">
+                    <option value="2">2 Players</option>
+                    <option value="3">3 Players</option>
+                    <option value="4" selected>4 Players</option>
+                    <option value="5">5 Players</option>
+                    <option value="6">6 Players</option>
+                    <option value="7">7 Players</option>
+                    <option value="8">8 Players</option>
+                </select>
+                <button onclick="generatePlayerNameInputs()" style="font-size: 1.1em; padding: 10px 20px; margin-left: 15px;">Set Player Names</button>
+            </div>
+            
+            <div id="player-names-section" style="display: none; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h3>📝 Player Names</h3>
+                <div id="player-name-inputs" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 15px 0;">
+                    <!-- Name inputs will be generated here -->
+                </div>
+                <div style="text-align: center; margin: 20px 0;">
+                    <button onclick="initializePlayers()" style="font-size: 1.2em; padding: 15px 30px; background: linear-gradient(45deg, #34a853, #2d8f47);">Start Game with These Names</button>
+                </div>
+            </div>
+            
+            <div id="player-selector" style="display: none;">
+                <h3>👀 View Player Hand</h3>
+                <div style="margin: 15px 0; display: flex; align-items: center; justify-content: center; gap: 15px;">
+                    <button onclick="previousPlayer()" id="prev-btn" style="font-size: 1.5em; padding: 10px 15px; background: #666; border-radius: 50%;">←</button>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label for="current-player" style="font-size: 1.1em;">Current Player:</label>
+                        <select id="current-player" onchange="switchPlayer()" style="padding: 8px; font-size: 1em; border-radius: 5px; background: #333; color: #fff; border: 2px solid #d4af37;">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <button onclick="nextPlayer()" id="next-btn" style="font-size: 1.5em; padding: 10px 15px; background: #666; border-radius: 50%;">→</button>
+                </div>
+                
+                <div id="current-player-hand" class="player-hand" style="max-width: 600px; margin: 20px auto;">
+                    <!-- Current player's hand will be displayed here -->
+                </div>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                    <h4>🃏 Draw Cards for Current Player</h4>
+                    <button onclick="drawCardForPlayer('identity')" style="margin: 5px;">Draw Identity</button>
+                    <button onclick="drawCardForPlayer('relationship')" style="margin: 5px;">Draw Relationship</button>
+                    <button onclick="drawCardForPlayer('backstory')" style="margin: 5px;">Draw Backstory</button>
+                    <button onclick="replaceCard()" style="margin: 5px; background: #ea4335;">Replace Selected Card</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-section">
+            <h2>⚖️ Round Scoring</h2>
+            <div class="scoring">
+                <p><strong>Award points after each argument round:</strong></p>
+                <ul>
+                    <li>🥇 Best Argument: 4 points</li>
+                    <li>🥈 Second Best: 3 points</li>
+                    <li>🥉 Third Best: 2 points</li>
+                    <li>🏴 Worst Argument: 1 point</li>
+                </ul>
+                <p><strong>Game Length:</strong> 3 rounds, then total scores to determine winner!</p>
+            </div>
+            
+            <div>
+                <h3>Player Scores</h3>
+                <div id="scoreboard">
+                    <!-- Scoreboard will be generated based on player count -->
+                </div>
+                <button onclick="resetScores()">Reset Scores</button>
+                <button onclick="declareWinner()">Declare Winner!</button>
+            </div>
+        </div>
+
+        <div class="game-section">
+            <h2>🃏 Draw More Cards</h2>
+            <p>Use these when players need to draw replacement cards during the game:</p>
+            <button onclick="drawCard('backstory')">Draw Backstory Card</button>
+            <button onclick="drawCard('objection')">Draw Objection Card</button>
+        </div>
+    </div>
+
+    <script>
+        // Card databases
+        const cards = {
+            identity: [
+                "The Family Patriarch/Matriarch", "The Black Sheep", "The Golden Child", "The Forgotten Middle Child",
+                "The Family Rebel", "The Overachiever", "The Baby of the Family", "The Family Screw-up",
+                "The Responsible One", "The Wild Child", "The Peacemaker", "The Drama Queen/King",
+                "The Family Genius", "The Athletic Star", "The Artist", "The Workaholic",
+                "Robot with Feelings", "Mafia Boss", "Failed Stand-up Comedian", "Professional Cat Lady/Man",
+                "Conspiracy Theorist", "Mall Santa", "Renaissance Fair Enthusiast", "Disco Dancing Champion",
+                "Professional Mourner", "Vampire (Allegedly)", "Time Traveler from 1987", "Retired Circus Performer",
+                "Internet Influencer with 3 Followers", "Professional Couch Potato", "Paranormal Investigator", "Former Child Star"
+            ],
+            relationship: [
+                "Beloved Grandchild", "Favorite Niece/Nephew", "Loyal Spouse", "Devoted Child",
+                "Trusted Friend", "Business Partner", "Caregiver", "Next-Door Neighbor",
+                "Former Enemy Turned Friend", "Secret Lover", "Godchild", "Protégé",
+                "Long-Lost Relative", "Family Doctor", "Spiritual Advisor", "Drinking Buddy",
+                "Deceased's Parole Officer", "You Killed Their Iguana", "Their Uber Driver", "Their WiFi Password Keeper",
+                "Their Dealer (Prescription Only)", "Their Fake ID Creator", "Their Laugh Track", "Their Personal Stalker",
+                "Their Embarrassing Dance Partner", "Their Nemesis", "Their Imaginary Friend", "Their Food Taster",
+                "Their Emotional Support Human", "Their Ghost Writer", "Their Professional Mourner", "Their Evil Twin"
+            ],
+            backstory: [
+                "I was there when they took their first steps", "I helped them through their divorce",
+                "I shared their secret hobby", "I was their emergency contact",
+                "I have their embarrassing photos", "I know where they hid the money",
+                "I was their partner in crime", "I nursed them when they were sick",
+                "I never missed their birthday", "I saved their life once",
+                "I completed their unfinished project", "I have their diary",
+                "I was their designated driver", "I helped them cheat on their taxes",
+                "I know their real age", "I was their alibi",
+                "I taught them everything they know", "I was their biggest disappointment",
+                "I was the only one who understood them", "I have their secret recipe",
+                "I was their getaway driver", "I know about their secret family",
+                "I was their confidant", "I helped them fake their death before",
+                "I was their gambling partner", "I know their real name",
+                "I was their wingman/wingwoman", "I helped them bury the evidence",
+                "I was their taste tester", "I know their passwords",
+                "I have a life-sized cutout of the deceased", "I've never been to Disneyland", "I Facebook stalked the person to my left",
+                "I still have their toothbrush", "I taught them how to twerk", "I was their cryptocurrency advisor",
+                "I helped them start their OnlyFans", "I know they're not really dead", "I have their browser history",
+                "I was their fake boyfriend/girlfriend at family events", "I helped them catfish someone online", "I know their Netflix password",
+                "I was their accomplice in elaborate pranks", "I have their collection of belly button lint", "I know they once ate dog food",
+                "I helped them escape from a mime convention", "I was their partner in a pyramid scheme", "I know their secret TikTok account",
+                "I helped them fake a medical condition", "I was their designated Instagram photographer", "I know about their furry costume"
+            ],
+            objection: [
+                "OBJECTION: That's hearsay!", "OBJECTION: Irrelevant to the will!",
+                "OBJECTION: You're lying under oath!", "OBJECTION: That's not how inheritance works!",
+                "OBJECTION: The deceased told me otherwise!", "OBJECTION: I have evidence to the contrary!",
+                "OBJECTION: That's illegal!", "OBJECTION: You can't prove that!",
+                "OBJECTION: The will says something different!", "OBJECTION: That violates their final wishes!",
+                "OBJECTION: You're twisting the truth!", "OBJECTION: That's speculation!",
+                "OBJECTION: I was there, that's not what happened!", "OBJECTION: You're out of order!",
+                "OBJECTION: That's not admissible evidence!", "OBJECTION: The statute of limitations has expired!",
+                "OBJECTION: You're faking that accent!", "OBJECTION: Your mouth is full of peanut butter!", "OBJECTION: You owe me ten bucks!",
+                "OBJECTION: That's not even a real word!", "OBJECTION: You're making that up!", "OBJECTION: Your phone is ringing!",
+                "OBJECTION: You smell like cheese!", "OBJECTION: That's what she said!", "OBJECTION: You're drunk!",
+                "OBJECTION: Your zipper is down!", "OBJECTION: That's not your real hair!", "OBJECTION: You're lactose intolerant!",
+                "OBJECTION: You still live with your mom!", "OBJECTION: You're wearing two different shoes!", "OBJECTION: That's literally impossible!",
+                "OBJECTION: You forgot to wear pants!", "OBJECTION: Your argument is stupid!", "OBJECTION: Nobody asked you!"
+            ]
+        };
+
+        let usedCards = {
+            identity: [],
+            relationship: [],
+            backstory: [],
+            objection: []
+        };
+
+        let playerScores = [];
+        let playerHands = [];
+        let playerNames = [];
+        let currentPlayerIndex = 0;
+
+        function drawCard(type) {
+            const availableCards = cards[type].filter(card => !usedCards[type].includes(card));
+            if (availableCards.length === 0) {
+                // Reset if all cards used
+                usedCards[type] = [];
+                availableCards.push(...cards[type]);
+            }
+            
+            const randomCard = availableCards[Math.floor(Math.random() * availableCards.length)];
+            usedCards[type].push(randomCard);
+            
+            const colors = {
+                identity: '#4285f4',
+                relationship: '#ea4335', 
+                backstory: '#34a853',
+                objection: '#000'
+            };
+            
+            document.getElementById(`${type}-drawn`).innerHTML = 
+                `<div class="card-display" style="border-left-color: ${colors[type]}">${randomCard}</div>`;
+            
+            return randomCard;
+        }
+
+        function generateDeceased() {
+            const identityCard = drawCard('identity');
+            const names = [
+                "Great Aunt Mildred", "Uncle Horatio", "Grandma Prudence", "Cousin Mortimer",
+                "Great Uncle Reginald", "Aunt Cordelia", "Grandpa Ezekiel", "Cousin Beatrice",
+                "Uncle Rex", "Aunt Gertrude", "Great Grandma Agatha", "Uncle Bartholomew",
+                "Cousin Moonbeam", "Uncle Bubbles", "Aunt Pickles", "Great Uncle Sparkles",
+                "Grandma Chaos", "Cousin Bananas", "Uncle Toot-Toot", "Aunt Giggles"
+            ];
+            const estates = [
+                "Victorian mansion and antique doll collection",
+                "Monster truck dealership and secret barbecue recipe",
+                "Cat sanctuary and recipe for rum cake",
+                "Collection of vintage lawn gnomes and a haunted greenhouse",
+                "Retirement home and collection of vintage postcards",
+                "Mysterious locked room and collection of old keys",
+                "Enormous library and a parrot that knows secrets",
+                "Antique shop and a diary full of town gossip",
+                "Food truck empire and collection of hot sauce",
+                "Abandoned carnival and fortune telling business",
+                "Secret underground bunker and collection of conspiracy theories",
+                "Taco Bell franchise and a pet llama named Gerald",
+                "Collection of 10,000 rubber ducks and a moat",
+                "Haunted miniature golf course and a time machine (broken)",
+                "Professional wrestling ring and a cape collection",
+                "Cheese factory and a diary of cheese puns",
+                "Bigfoot research facility and blurry photographs",
+                "Indoor water park and a collection of pool noodles",
+                "Escape room business and trust issues",
+                "Karaoke bar and a collection of wigs"
+            ];
+            
+            const name = names[Math.floor(Math.random() * names.length)];
+            const estate = estates[Math.floor(Math.random() * estates.length)];
+            
+            document.getElementById('deceased-display').innerHTML = 
+                `<h3>${name}</h3><p><strong>Identity:</strong> ${identityCard}</p><p><strong>Estate:</strong> ${estate}</p>`;
+        }
+
+        function generatePlayerNameInputs() {
+            const playerCount = parseInt(document.getElementById('player-count').value);
+            const nameInputsDiv = document.getElementById('player-name-inputs');
+            const nameSection = document.getElementById('player-names-section');
+            
+            nameInputsDiv.innerHTML = '';
+            
+            for (let i = 1; i <= playerCount; i++) {
+                const inputDiv = document.createElement('div');
+                inputDiv.style.display = 'flex';
+                inputDiv.style.flexDirection = 'column';
+                inputDiv.style.alignItems = 'center';
+                
+                inputDiv.innerHTML = `
+                    <label for="player-${i}-name" style="font-size: 1em; margin-bottom: 5px; color: #d4af37;">Player ${i}:</label>
+                    <input type="text" id="player-${i}-name" placeholder="Enter name..." value="Player ${i}" 
+                           style="padding: 8px; border-radius: 5px; border: 2px solid #d4af37; background: #333; color: #fff; text-align: center; width: 150px;">
+                `;
+                nameInputsDiv.appendChild(inputDiv);
+            }
+            
+            nameSection.style.display = 'block';
+        }
+
+        function initializePlayers() {
+            const playerCount = parseInt(document.getElementById('player-count').value);
+            
+            // Get player names from inputs
+            playerNames = [];
+            for (let i = 1; i <= playerCount; i++) {
+                const nameInput = document.getElementById(`player-${i}-name`);
+                const name = nameInput ? nameInput.value.trim() : `Player ${i}`;
+                playerNames.push(name || `Player ${i}`);
+            }
+            
+            // Initialize player hands and scores
+            playerHands = [];
+            playerScores = new Array(playerCount).fill(0);
+            
+            // Create hands for each player
+            for (let i = 0; i < playerCount; i++) {
+                playerHands.push({
+                    identity: drawCard('identity'),
+                    relationship: drawCard('relationship'),
+                    backstory: [drawCard('backstory'), drawCard('backstory')]
+                });
+            }
+            
+            // Setup player selector
+            const playerSelector = document.getElementById('current-player');
+            playerSelector.innerHTML = '';
+            for (let i = 0; i < playerCount; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = playerNames[i];
+                playerSelector.appendChild(option);
+            }
+            
+            // Show player selector and display first player
+            document.getElementById('player-selector').style.display = 'block';
+            currentPlayerIndex = 0;
+            switchPlayer();
+            generateScoreboard(playerCount);
+            updateNavigationButtons();
+        }
+
+        function switchPlayer() {
+            currentPlayerIndex = parseInt(document.getElementById('current-player').value);
+            displayCurrentPlayerHand();
+            updateNavigationButtons();
+        }
+
+        function nextPlayer() {
+            const playerCount = playerHands.length;
+            currentPlayerIndex = (currentPlayerIndex + 1) % playerCount;
+            document.getElementById('current-player').value = currentPlayerIndex;
+            displayCurrentPlayerHand();
+            updateNavigationButtons();
+        }
+
+        function previousPlayer() {
+            const playerCount = playerHands.length;
+            currentPlayerIndex = (currentPlayerIndex - 1 + playerCount) % playerCount;
+            document.getElementById('current-player').value = currentPlayerIndex;
+            displayCurrentPlayerHand();
+            updateNavigationButtons();
+        }
+
+        function updateNavigationButtons() {
+            const playerCount = playerHands.length;
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            
+            // Add hover effects
+            if (currentPlayerIndex === 0) {
+                prevBtn.style.background = '#444';
+                prevBtn.style.opacity = '0.6';
+            } else {
+                prevBtn.style.background = '#666';
+                prevBtn.style.opacity = '1';
+            }
+            
+            if (currentPlayerIndex === playerCount - 1) {
+                nextBtn.style.background = '#444';
+                nextBtn.style.opacity = '0.6';
+            } else {
+                nextBtn.style.background = '#666';
+                nextBtn.style.opacity = '1';
+            }
+        }
+
+        function displayCurrentPlayerHand() {
+            const hand = playerHands[currentPlayerIndex];
+            const playerName = playerNames[currentPlayerIndex];
+            const handDiv = document.getElementById('current-player-hand');
+            
+            handDiv.innerHTML = `
+                <h3>${playerName}'s Hand</h3>
+                <div class="card-display" style="border-left-color: #4285f4; cursor: pointer;" onclick="selectCard('identity')">
+                    <strong>Identity:</strong> ${hand.identity}
+                    <span id="identity-selected" style="display: none;">✓ SELECTED</span>
+                </div>
+                <div class="card-display" style="border-left-color: #ea4335; cursor: pointer;" onclick="selectCard('relationship')">
+                    <strong>Relationship:</strong> ${hand.relationship}
+                    <span id="relationship-selected" style="display: none;">✓ SELECTED</span>
+                </div>
+                <div class="card-display" style="border-left-color: #34a853; cursor: pointer;" onclick="selectCard('backstory-0')">
+                    <strong>Backstory 1:</strong> ${hand.backstory[0]}
+                    <span id="backstory-0-selected" style="display: none;">✓ SELECTED</span>
+                </div>
+                <div class="card-display" style="border-left-color: #34a853; cursor: pointer;" onclick="selectCard('backstory-1')">
+                    <strong>Backstory 2:</strong> ${hand.backstory[1]}
+                    <span id="backstory-1-selected" style="display: none;">✓ SELECTED</span>
+                </div>
+            `;
+        }
+
+        let selectedCard = null;
+
+        function selectCard(cardType) {
+            // Clear previous selection
+            const selected = document.querySelectorAll('[id$="-selected"]');
+            selected.forEach(el => el.style.display = 'none');
+            
+            // Show new selection
+            document.getElementById(cardType + '-selected').style.display = 'inline';
+            selectedCard = cardType;
+        }
+
+        function drawCardForPlayer(cardType) {
+            const newCard = drawCard(cardType);
+            const hand = playerHands[currentPlayerIndex];
+            const playerName = playerNames[currentPlayerIndex];
+            
+            if (cardType === 'backstory') {
+                hand.backstory.push(newCard);
+            } else {
+                // For identity/relationship, create a temporary display
+                alert(`New ${cardType} card for ${playerName}: ${newCard}\n\nUse "Replace Selected Card" to swap it with an existing card.`);
+                return;
+            }
+            
+            displayCurrentPlayerHand();
+        }
+
+        function replaceCard() {
+            if (!selectedCard) {
+                alert('Please select a card to replace first!');
+                return;
+            }
+            
+            const hand = playerHands[currentPlayerIndex];
+            let cardType;
+            
+            if (selectedCard === 'identity') {
+                cardType = 'identity';
+            } else if (selectedCard === 'relationship') {
+                cardType = 'relationship';
+            } else if (selectedCard.startsWith('backstory')) {
+                cardType = 'backstory';
+            }
+            
+            const newCard = drawCard(cardType);
+            
+            if (selectedCard === 'identity') {
+                hand.identity = newCard;
+            } else if (selectedCard === 'relationship') {
+                hand.relationship = newCard;
+            } else if (selectedCard === 'backstory-0') {
+                hand.backstory[0] = newCard;
+            } else if (selectedCard === 'backstory-1') {
+                hand.backstory[1] = newCard;
+            }
+            
+            selectedCard = null;
+            displayCurrentPlayerHand();
+        }
+
+        function generateScoreboard(playerCount) {
+            const scoreboardDiv = document.getElementById('scoreboard');
+            scoreboardDiv.innerHTML = '';
+            
+            for (let i = 0; i < playerCount; i++) {
+                const playerScoreDiv = document.createElement('div');
+                playerScoreDiv.style.margin = '10px 0';
+                playerScoreDiv.style.padding = '10px';
+                playerScoreDiv.style.background = 'rgba(255,255,255,0.1)';
+                playerScoreDiv.style.borderRadius = '5px';
+                const playerName = playerNames[i] || `Player ${i + 1}`;
+                playerScoreDiv.innerHTML = `
+                    ${playerName}: <span id="p${i}-score">0</span> points 
+                    <button onclick="addPoint(${i})">+1</button> 
+                    <button onclick="addPoints(${i},2)">+2</button> 
+                    <button onclick="addPoints(${i},3)">+3</button> 
+                    <button onclick="addPoints(${i},4)">+4</button>
+                `;
+                scoreboardDiv.appendChild(playerScoreDiv);
+            }
+        }
+
+        function addPoint(player) {
+            addPoints(player, 1);
+        }
+
+        function addPoints(player, points) {
+            playerScores[player] += points;
+            document.getElementById(`p${player}-score`).textContent = playerScores[player];
+        }
+
+        function resetScores() {
+            const playerCount = playerScores.length;
+            playerScores = new Array(playerCount).fill(0);
+            for (let i = 0; i < playerCount; i++) {
+                const scoreElement = document.getElementById(`p${i}-score`);
+                if (scoreElement) {
+                    scoreElement.textContent = '0';
+                }
+            }
+        }
+
+        function declareWinner() {
+            const maxScore = Math.max(...playerScores);
+            const winners = [];
+            playerScores.forEach((score, index) => {
+                if (score === maxScore) winners.push(playerNames[index]);
+            });
+            
+            if (winners.length === 1) {
+                alert(`🎉 ${winners[0]} wins with ${maxScore} points! They inherit the estate! 🎉`);
+            } else {
+                alert(`🤝 Tie between ${winners.join(' and ')} with ${maxScore} points each! Estate Keeper breaks the tie!`);
+            }
+        }
+        // Initialize player name inputs on page load
+        window.onload = function() {
+            generatePlayerNameInputs();
+        };
+    </script>
+</body>
+</html>
