@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getGameState, setEstateKeeper, dealCards, updatePlayerScore, drawCardForPlayer, nextTurn, endPlayerTurn, subscribeToGameEvents, GameState, Player } from '@/utils/gameUtils';
+import { getGameState, setEstateKeeper, dealCards, updatePlayerScore, drawCardForPlayer, nextTurn, endPlayerTurn, subscribeToGameEvents, getGameEvents, GameState, Player, GameEvent } from '@/utils/gameUtils';
 import { drawRandomCard, GAME_CARDS } from '@/utils/gameCards';
 import { supabase } from '@/utils/db/supabase';
 
@@ -18,6 +18,10 @@ export default function GamePage() {
   const [showRules, setShowRules] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<string>('');
   const [newCard, setNewCard] = useState<string>('');
+  const [showEventsLog, setShowEventsLog] = useState(false);
+  const [gameEvents, setGameEvents] = useState<GameEvent[]>([]);
+  const [selectedPlayerIndex, setSelectedPlayerIndex] = useState(0);
+  const [showSelectedPlayerCards, setShowSelectedPlayerCards] = useState(true);
   const subscriptionRef = useRef<any>(null);
 
   const currentPlayer = gameState?.players.find(p => p.id === playerId);
@@ -55,6 +59,9 @@ export default function GamePage() {
       const result = await getGameState(gameData.id, storedPlayerId);
       if (result) {
         setGameState(result.game);
+        // Also load game events
+        const events = await getGameEvents(gameData.id);
+        setGameEvents(events);
       } else {
         setError('Game not found');
       }
@@ -153,6 +160,20 @@ export default function GamePage() {
       const eventData = payload.new?.event_data;
       console.log('🎮 Game event type:', eventType);
       console.log('🎮 Game event data:', eventData);
+      
+      // Add new event to events log
+      if (payload.eventType === 'INSERT' && payload.new) {
+        const newEvent: GameEvent = {
+          id: payload.new.id,
+          event_type: payload.new.event_type,
+          event_data: payload.new.event_data,
+          created_at: payload.new.created_at || new Date().toISOString(),
+          created_by: payload.new.created_by,
+          creator_name: 'System' // We'll update this if needed
+        };
+        
+        setGameEvents(prevEvents => [newEvent, ...prevEvents.slice(0, 49)]);
+      }
       
       if (eventType === 'score_updated' && eventData) {
         console.log('🎯 Handling score update event for player:', eventData.player_id, 'new score:', eventData.points);
@@ -261,6 +282,13 @@ export default function GamePage() {
     loadGameState();
   }, [loadGameState]);
 
+  // Sync selected player index with current turn player
+  useEffect(() => {
+    if (gameState && isEstateKeeper && gameState.status === 'playing') {
+      setSelectedPlayerIndex(gameState.current_player_turn || 0);
+    }
+  }, [gameState?.current_player_turn, isEstateKeeper, gameState?.status]);
+
   useEffect(() => {
     if (!gameState) return;
 
@@ -349,6 +377,51 @@ export default function GamePage() {
     }
   };
 
+  const formatEventMessage = (event: GameEvent) => {
+    const eventData = event.event_data || {};
+    const playerName = gameState?.players.find(p => p.id === eventData.player_id)?.name || 'Unknown Player';
+    const targetPlayerName = gameState?.players.find(p => p.id === eventData.target_player_id)?.name || 'Unknown Player';
+    
+    switch (event.event_type) {
+      case 'player_joined':
+        return `${eventData.player_name} joined the game`;
+      case 'estate_keeper_set':
+        const estateKeeperName = gameState?.players.find(p => p.id === eventData.estate_keeper_id)?.name || 'Unknown Player';
+        return `${estateKeeperName} was set as Estate Keeper`;
+      case 'cards_dealt':
+        return 'Cards have been dealt and game started';
+      case 'score_updated':
+        return `${playerName} scored ${eventData.points} points`;
+      case 'card_drawn':
+        return `${playerName} drew a ${eventData.card_type} card`;
+      case 'turn_advanced':
+        const nextPlayerName = gameState?.players.filter(p => !p.is_estate_keeper)[eventData.new_turn]?.name || 'Unknown Player';
+        return `Turn advanced to ${nextPlayerName} (Round ${eventData.new_round})`;
+      case 'player_turn_ended':
+        return `${playerName} ended their turn`;
+      default:
+        return `${event.event_type}: ${JSON.stringify(eventData)}`;
+    }
+  };
+
+  const formatEventTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const navigateToPlayer = (direction: 'prev' | 'next') => {
+    if (!gameState || !isEstateKeeper) return;
+    
+    const nonEstateKeeperPlayers = gameState.players.filter(p => !p.is_estate_keeper);
+    const maxIndex = nonEstateKeeperPlayers.length - 1;
+    
+    if (direction === 'prev') {
+      setSelectedPlayerIndex(prev => prev > 0 ? prev - 1 : maxIndex);
+    } else {
+      setSelectedPlayerIndex(prev => prev < maxIndex ? prev + 1 : 0);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -392,6 +465,12 @@ export default function GamePage() {
               className="bg-amber-700 hover:bg-amber-600 text-white px-4 py-2 rounded-lg transition-colors"
             >
               {showRules ? 'Hide Rules' : 'Show Rules'}
+            </button>
+            <button
+              onClick={() => setShowEventsLog(!showEventsLog)}
+              className="bg-purple-700 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              {showEventsLog ? 'Hide Events' : 'Show Events'}
             </button>
             <button
               onClick={() => {
@@ -441,26 +520,95 @@ export default function GamePage() {
         {/* Rules */}
         {showRules && (
           <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 mb-8 border border-amber-500/20">
-            <h2 className="text-2xl font-bold text-amber-300 mb-4">Game Rules</h2>
-            <div className="grid md:grid-cols-2 gap-6 text-amber-100">
-              <div>
-                <h3 className="font-bold text-amber-200 mb-2">Estate Keeper Role:</h3>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>Manage the game flow</li>
-                  <li>Hold all Objection cards</li>
-                  <li>Judge inheritance arguments</li>
-                  <li>Award 4-1 points per round</li>
-                </ul>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-amber-300">Game Rules</h2>
+              <a
+                href="https://www.someonehasdiedgame.com/howtoplay"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 rounded text-sm transition-colors"
+              >
+                📖 Full Official Rules
+              </a>
+            </div>
+            
+            {isEstateKeeper ? (
+              <div className="text-amber-100 space-y-4">
+                <div>
+                  <h3 className="font-bold text-purple-300 mb-3">Your Role as Estate Keeper:</h3>
+                  <ul className="list-disc list-inside space-y-2">
+                    <li><strong>Game Master & Judge:</strong> Guide players through the experience and decide who wins</li>
+                    <li><strong>Objection Cards:</strong> Award objection cards to players who say something funny or clever</li>
+                    <li><strong>Scoring:</strong> Award 1-4 points based on how compelling or entertaining each argument is</li>
+                    <li><strong>Turn Management:</strong> Control the flow between rounds and advance turns</li>
+                    <li><strong>Final Decision:</strong> Choose the winner based on who made the best case (or entertained you most!)</li>
+                  </ul>
+                </div>
+                <div className="bg-purple-900/20 p-4 rounded-lg border border-purple-500/20">
+                  <h4 className="font-bold text-purple-200 mb-2">Game Flow:</h4>
+                  <ol className="list-decimal list-inside space-y-1 text-sm">
+                    <li><strong>Opening Statements:</strong> Players introduce themselves and their claim</li>
+                    <li><strong>Interrogation:</strong> Ask each player one direct question</li>
+                    <li><strong>Recess:</strong> Players question each other "off the record"</li>
+                    <li><strong>Final Statements:</strong> Last chance for players to make their case</li>
+                  </ol>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-amber-200 mb-2">Player Role:</h3>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>Argue for your inheritance</li>
-                  <li>Use your cards creatively</li>
-                  <li>Survive objections</li>
-                  <li>Score the most points to win</li>
-                </ul>
+            ) : (
+              <div className="text-amber-100 space-y-4">
+                <div>
+                  <h3 className="font-bold text-amber-200 mb-3">Your Role as Player:</h3>
+                  <ul className="list-disc list-inside space-y-2">
+                    <li><strong>Craft Your Character:</strong> Use ALL cards in your hand to create a compelling story</li>
+                    <li><strong>Make Your Case:</strong> Convince the estate keeper you deserve the inheritance</li>
+                    <li><strong>Use Cards Creatively:</strong> Incorporate identity, relationship, backstory, and objection cards</li>
+                    <li><strong>Interact & Object:</strong> Use objection cards during others' turns (max 2 per turn)</li>
+                    <li><strong>Defend Your Story:</strong> Respond to objections - you cannot declare them false!</li>
+                  </ul>
+                </div>
+                <div className="bg-amber-900/20 p-4 rounded-lg border border-amber-500/20">
+                  <h4 className="font-bold text-amber-200 mb-2">Card Types:</h4>
+                  <ul className="text-sm space-y-1">
+                    <li><span className="text-blue-300">🔵 Identity:</span> Your occupation or character description</li>
+                    <li><span className="text-red-300">🔴 Relationship:</span> How you knew the deceased</li>
+                    <li><span className="text-green-300">🟢 Backstory:</span> Items, quirks, or life events to include</li>
+                    <li><span className="text-gray-300">⚫ Objection:</span> Interrupt others with these statements</li>
+                  </ul>
+                </div>
               </div>
+            )}
+          </div>
+        )}
+
+        {/* Events Log */}
+        {showEventsLog && (
+          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 mb-8 border border-purple-500/20">
+            <h2 className="text-2xl font-bold text-purple-300 mb-4">📜 Game Events Log</h2>
+            <div className="max-h-96 overflow-y-auto space-y-2">
+              {gameEvents.length === 0 ? (
+                <div className="text-purple-200 text-center py-4">No events yet...</div>
+              ) : (
+                gameEvents.map((event) => (
+                  <div
+                    key={event.id}
+                    className="bg-black/20 rounded-lg p-3 border border-purple-500/10"
+                  >
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="text-purple-100 text-sm flex-1">
+                        {formatEventMessage(event)}
+                      </div>
+                      <div className="text-purple-300 text-xs font-mono shrink-0">
+                        {formatEventTime(event.created_at)}
+                      </div>
+                    </div>
+                    {event.creator_name && event.creator_name !== 'System' && (
+                      <div className="text-purple-400 text-xs mt-1">
+                        by {event.creator_name}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
@@ -597,133 +745,264 @@ export default function GamePage() {
             )}
           </div>
 
-          {/* Middle Column - My Cards (if not estate keeper) */}
-          {!isEstateKeeper && gameState.status === 'playing' && currentPlayer?.cards && (
+          {/* Middle Column - My Cards (if not estate keeper) or Player Cards (if estate keeper) */}
+          {gameState.status === 'playing' && (
             <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-amber-500/20">
-              <h3 className="text-2xl font-bold text-amber-300 mb-6 text-center">
-                🎴 Your Cards 🎴
-              </h3>
-              
-              <div className="space-y-4">
-                {currentPlayer.cards.identity && (
-                  <div className={`p-4 rounded-lg border-2 ${getCardColor('identity')}`}>
-                    <div className="text-sm text-blue-300 font-bold mb-2">IDENTITY</div>
-                    <div className="text-lg">{currentPlayer.cards.identity}</div>
-                  </div>
-                )}
-                
-                {currentPlayer.cards.relationship && (
-                  <div className={`p-4 rounded-lg border-2 ${getCardColor('relationship')}`}>
-                    <div className="text-sm text-red-300 font-bold mb-2">RELATIONSHIP</div>
-                    <div className="text-lg">{currentPlayer.cards.relationship}</div>
-                  </div>
-                )}
-                
-                {(currentPlayer.cards.backstory || []).map((card, idx) => (
-                  <div key={idx} className={`p-4 rounded-lg border-2 ${getCardColor('backstory')}`}>
-                    <div className="text-sm text-green-300 font-bold mb-2">BACKSTORY {idx + 1}</div>
-                    <div className="text-lg">{card}</div>
-                  </div>
-                ))}
-                
-                {((currentPlayer.cards as any).objections || []).map((card: string, idx: number) => (
-                  <div key={idx} className={`p-4 rounded-lg border-2 ${getCardColor('objection')}`}>
-                    <div className="text-sm text-gray-300 font-bold mb-2">OBJECTION {idx + 1}</div>
-                    <div className="text-lg">{card}</div>
-                  </div>
-                ))}
-              </div>
+              {!isEstateKeeper ? (
+                // Regular player view - show their own cards
+                currentPlayer?.cards && (
+                  <>
+                    <h3 className="text-2xl font-bold text-amber-300 mb-6 text-center">
+                      🎴 Your Cards 🎴
+                    </h3>
+                    
+                    <div className="space-y-4">
+                      {currentPlayer.cards.identity && (
+                        <div className={`p-4 rounded-lg border-2 ${getCardColor('identity')}`}>
+                          <div className="text-sm text-blue-300 font-bold mb-2">IDENTITY</div>
+                          <div className="text-lg">{currentPlayer.cards.identity}</div>
+                        </div>
+                      )}
+                      
+                      {currentPlayer.cards.relationship && (
+                        <div className={`p-4 rounded-lg border-2 ${getCardColor('relationship')}`}>
+                          <div className="text-sm text-red-300 font-bold mb-2">RELATIONSHIP</div>
+                          <div className="text-lg">{currentPlayer.cards.relationship}</div>
+                        </div>
+                      )}
+                      
+                      {(currentPlayer.cards.backstory || []).map((card, idx) => (
+                        <div key={idx} className={`p-4 rounded-lg border-2 ${getCardColor('backstory')}`}>
+                          <div className="text-sm text-green-300 font-bold mb-2">BACKSTORY {idx + 1}</div>
+                          <div className="text-lg">{card}</div>
+                        </div>
+                      ))}
+                      
+                      {((currentPlayer.cards as any).objections || []).map((card: string, idx: number) => (
+                        <div key={idx} className={`p-4 rounded-lg border-2 ${getCardColor('objection')}`}>
+                          <div className="text-sm text-gray-300 font-bold mb-2">OBJECTION {idx + 1}</div>
+                          <div className="text-lg">{card}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )
+              ) : (
+                // Estate keeper view - show selected player's details with navigation
+                (() => {
+                  const nonEstateKeeperPlayers = gameState.players.filter(p => !p.is_estate_keeper);
+                  const selectedPlayer = nonEstateKeeperPlayers[selectedPlayerIndex];
+                  
+                  return selectedPlayer ? (
+                    <>
+                      <div className="flex items-center justify-between mb-6">
+                        <button
+                          onClick={() => navigateToPlayer('prev')}
+                          className="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-lg transition-colors"
+                          disabled={nonEstateKeeperPlayers.length <= 1}
+                        >
+                          ← Prev
+                        </button>
+                        
+                        <div className="text-center">
+                          <h3 className="text-2xl font-bold text-purple-300 mb-1">
+                            ⚖️ {selectedPlayer.name}
+                          </h3>
+                          <div className="text-sm text-purple-200">
+                            Player {selectedPlayerIndex + 1} of {nonEstateKeeperPlayers.length}
+                            {selectedPlayerIndex === (gameState.current_player_turn || 0) && (
+                              <span className="text-blue-300 ml-2">(Current Turn)</span>
+                            )}
+                          </div>
+                          <div className="text-lg font-bold text-amber-200 mt-1">
+                            {selectedPlayer.score} points
+                          </div>
+                        </div>
+                        
+                        <button
+                          onClick={() => navigateToPlayer('next')}
+                          className="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-lg transition-colors"
+                          disabled={nonEstateKeeperPlayers.length <= 1}
+                        >
+                          Next →
+                        </button>
+                      </div>
+
+                      {/* Scoring Controls */}
+                      <div className="mb-6 p-4 bg-purple-900/20 rounded-lg border border-purple-500/20">
+                        <div className="text-sm text-purple-300 font-semibold mb-3">SCORING CONTROLS</div>
+                        <div className="space-y-3">
+                          <div>
+                            <div className="text-xs text-purple-300 font-semibold mb-2">AWARD POINTS:</div>
+                            <div className="flex gap-2">
+                              {[1, 2, 3, 4].map(points => (
+                                <button
+                                  key={points}
+                                  onClick={() => handleUpdateScore(selectedPlayer.id, selectedPlayer.score + points)}
+                                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-sm px-3 py-2 rounded transition-colors"
+                                >
+                                  +{points}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-purple-300 font-semibold mb-2">REMOVE POINTS:</div>
+                            <div className="flex gap-2">
+                              {[1, 2, 3, 4].map(points => (
+                                <button
+                                  key={points}
+                                  onClick={() => handleUpdateScore(selectedPlayer.id, Math.max(0, selectedPlayer.score - points))}
+                                  className="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2 rounded transition-colors"
+                                >
+                                  -{points}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-purple-300 font-semibold mb-2">DRAW CARDS:</div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleDrawCard(selectedPlayer.id, 'backstory')}
+                                className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-2 rounded transition-colors"
+                              >
+                                Backstory
+                              </button>
+                              <button
+                                onClick={() => handleDrawCard(selectedPlayer.id, 'objection')}
+                                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-sm px-3 py-2 rounded transition-colors"
+                              >
+                                Objection
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Collapsible Cards Section */}
+                      {selectedPlayer.cards && (
+                        <div className="border border-purple-500/20 rounded-lg">
+                          <button
+                            onClick={() => setShowSelectedPlayerCards(!showSelectedPlayerCards)}
+                            className="w-full p-4 text-left bg-purple-900/10 hover:bg-purple-900/20 rounded-t-lg transition-colors flex items-center justify-between"
+                          >
+                            <span className="text-lg font-bold text-purple-300">
+                              🎴 View Cards
+                            </span>
+                            <span className="text-purple-300">
+                              {showSelectedPlayerCards ? '▼' : '▶'}
+                            </span>
+                          </button>
+                          
+                          {showSelectedPlayerCards && (
+                            <div className="p-4 space-y-4">
+                              {selectedPlayer.cards.identity && (
+                                <div className={`p-4 rounded-lg border-2 ${getCardColor('identity')}`}>
+                                  <div className="text-sm text-blue-300 font-bold mb-2">IDENTITY</div>
+                                  <div className="text-lg">{selectedPlayer.cards.identity}</div>
+                                </div>
+                              )}
+                              
+                              {selectedPlayer.cards.relationship && (
+                                <div className={`p-4 rounded-lg border-2 ${getCardColor('relationship')}`}>
+                                  <div className="text-sm text-red-300 font-bold mb-2">RELATIONSHIP</div>
+                                  <div className="text-lg">{selectedPlayer.cards.relationship}</div>
+                                </div>
+                              )}
+                              
+                              {(selectedPlayer.cards.backstory || []).map((card, idx) => (
+                                <div key={idx} className={`p-4 rounded-lg border-2 ${getCardColor('backstory')}`}>
+                                  <div className="text-sm text-green-300 font-bold mb-2">BACKSTORY {idx + 1}</div>
+                                  <div className="text-lg">{card}</div>
+                                </div>
+                              ))}
+                              
+                              {((selectedPlayer.cards as any).objections || []).map((card: string, idx: number) => (
+                                <div key={idx} className={`p-4 rounded-lg border-2 ${getCardColor('objection')}`}>
+                                  <div className="text-sm text-gray-300 font-bold mb-2">OBJECTION {idx + 1}</div>
+                                  <div className="text-lg">{card}</div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center text-purple-200">
+                      No player selected
+                    </div>
+                  );
+                })()
+              )}
             </div>
           )}
 
-          {/* Right Column - Other Players */}
+          {/* Right Column - Leaderboard */}
           <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-amber-500/20">
             <h3 className="text-2xl font-bold text-amber-300 mb-6 text-center">
-              Players ({displayPlayers.length}/12)
+              🏆 Leaderboard
             </h3>
             
-            <div className="space-y-4">
-              {displayPlayers.map((player) => (
+            <div className="space-y-3">
+              {displayPlayers
+                .sort((a, b) => b.score - a.score)
+                .map((player, index) => (
                 <div
                   key={player.id}
-                  className={`p-4 rounded-lg border-2 ${
-                    player.is_host 
+                  className={`p-3 rounded-lg border ${
+                    index === 0 && player.score > 0
                       ? 'border-amber-400 bg-amber-900/20'
                       : currentTurnPlayer?.id === player.id
                       ? 'border-blue-400 bg-blue-900/20'
                       : 'border-gray-400 bg-gray-900/20'
                   }`}
                 >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="font-bold text-lg">
-                        {player.name}
-                        {player.is_host && <span className="text-amber-300 ml-2">👑</span>}
-                        {currentTurnPlayer?.id === player.id && gameState.status === 'playing' && (
-                          <span className="text-blue-300 ml-2">🔵</span>
-                        )}
-                        {player.id === playerId && <span className="text-green-300 ml-2">(You)</span>}
-                      </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
                       <div className="text-lg font-bold text-amber-200">
-                        {player.score} points
+                        #{index + 1}
                       </div>
+                      <div>
+                        <div className="font-bold">
+                          {player.name}
+                          {player.is_host && <span className="text-amber-300 ml-1">👑</span>}
+                          {currentTurnPlayer?.id === player.id && gameState.status === 'playing' && (
+                            <span className="text-blue-300 ml-1">🔵</span>
+                          )}
+                          {player.id === playerId && <span className="text-green-300 ml-1">(You)</span>}
+                        </div>
+                        {gameState.status === 'playing' && player.cards && player.id !== playerId && !isEstateKeeper && (
+                          <div className="text-xs text-gray-400">
+                            {player.cards.identity ? 1 : 0}I, {player.cards.relationship ? 1 : 0}R, {(player.cards.backstory || []).length}B, {((player.cards as any).objections || []).length}O
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-amber-200">
+                        {player.score}
+                      </div>
+                      <div className="text-xs text-gray-400">points</div>
                     </div>
                   </div>
-
-                  {/* Show card counts for others, full cards for self */}
-                  {gameState.status === 'playing' && player.cards && player.id !== playerId && (
-                    <div className="mt-2 text-sm text-gray-400">
-                      Cards: {player.cards.identity ? 1 : 0} Identity, {player.cards.relationship ? 1 : 0} Relationship, {(player.cards.backstory || []).length} Backstory, {((player.cards as any).objections || []).length} Objection
-                    </div>
-                  )}
-
-                  {/* Estate Keeper Controls for Scoring */}
-                  {isEstateKeeper && gameState.status === 'playing' && (
-                    <div className="mt-4 space-y-2">
-                      <div className="text-xs text-purple-300 font-semibold">AWARD POINTS:</div>
-                      <div className="flex gap-1">
-                        {[1, 2, 3, 4].map(points => (
-                          <button
-                            key={points}
-                            onClick={() => handleUpdateScore(player.id, player.score + points)}
-                            className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-xs px-2 py-1 rounded transition-colors"
-                          >
-                            +{points}
-                          </button>
-                        ))}
-                      </div>
-                      <div className="text-xs text-purple-300 font-semibold mt-2">REMOVE POINTS:</div>
-                      <div className="flex gap-1">
-                        {[1, 2, 3, 4].map(points => (
-                          <button
-                            key={points}
-                            onClick={() => handleUpdateScore(player.id, Math.max(0, player.score - points))}
-                            className="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs px-2 py-1 rounded transition-colors"
-                          >
-                            -{points}
-                          </button>
-                        ))}
-                      </div>
-                      <div className="text-xs text-purple-300 font-semibold mt-2">DRAW CARDS:</div>
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => handleDrawCard(player.id, 'backstory')}
-                          className="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1 rounded transition-colors"
-                        >
-                          Backstory
-                        </button>
-                        <button
-                          onClick={() => handleDrawCard(player.id, 'objection')}
-                          className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-xs px-2 py-1 rounded transition-colors"
-                        >
-                          Objection
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
+
+            {gameState.status === 'playing' && (
+              <div className="mt-6 pt-4 border-t border-amber-500/20">
+                <div className="text-center text-sm text-amber-200">
+                  Round {gameState.current_round} of {gameState.max_rounds}
+                </div>
+                {estateKeeper && (
+                  <div className="text-center text-xs text-purple-200 mt-1">
+                    Estate Keeper: {estateKeeper.name} ⚖️
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

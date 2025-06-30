@@ -625,6 +625,47 @@ export async function endPlayerTurn(gameId: string, playerId: string): Promise<b
   }
 }
 
+export interface GameEvent {
+  id: string;
+  event_type: string;
+  event_data: any;
+  created_at: string;
+  created_by: string | null;
+  creator_name?: string;
+}
+
+export async function getGameEvents(gameId: string): Promise<GameEvent[]> {
+  try {
+    const { data, error } = await supabase
+      .from('game_events')
+      .select(`
+        id,
+        event_type,
+        event_data,
+        created_at,
+        created_by,
+        players!game_events_created_by_fkey(name)
+      `)
+      .eq('game_id', gameId)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) throw error;
+
+    return data.map(event => ({
+      id: event.id,
+      event_type: event.event_type,
+      event_data: event.event_data,
+      created_at: event.created_at || new Date().toISOString(),
+      created_by: event.created_by,
+      creator_name: (event.players as any)?.name || 'System'
+    }));
+  } catch (error) {
+    console.error('Error fetching game events:', error);
+    return [];
+  }
+}
+
 export function subscribeToGameEvents(gameId: string, callback: (event: any) => void) {
   console.log('🚀 Setting up subscription for game:', gameId);
   
