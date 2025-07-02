@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getGameState, setEstateKeeper, dealCards, updatePlayerScore, drawCardForPlayer, nextTurn, endPlayerTurn, subscribeToGameEvents, getGameEvents, GameState, Player, GameEvent, ROUND_NAMES } from '@/utils/gameUtils';
+import { getGameState, setEstateKeeper, dealCards, updatePlayerScore, drawCardForPlayer, nextTurn, endPlayerTurn, subscribeToGameEvents, getGameEvents, rerollDeceasedAttribute, GameState, Player, GameEvent, ROUND_NAMES } from '@/utils/gameUtils';
 import { drawRandomCard, GAME_CARDS, getEstateItemsForDisplay } from '@/utils/gameCards';
 import { supabase } from '@/utils/db/supabase';
 
@@ -261,6 +261,25 @@ export default function GamePage() {
             estate_keeper_id: eventData.estate_keeper_id
           };
         });
+      } else if (eventType === 'deceased_rerolled' && eventData) {
+        console.log('💀 Handling deceased re-rolled event');
+        setGameState(prevState => {
+          if (!prevState) return prevState;
+          
+          const updatedState = { ...prevState };
+          
+          if (eventData.rerolled_attributes.includes('name') && eventData.new_name) {
+            updatedState.deceased_name = eventData.new_name;
+          }
+          if (eventData.rerolled_attributes.includes('identity') && eventData.new_identity) {
+            updatedState.deceased_identity = eventData.new_identity;
+          }
+          if (eventData.rerolled_attributes.includes('estate') && eventData.new_estate) {
+            updatedState.deceased_estate = eventData.new_estate;
+          }
+          
+          return updatedState;
+        });
       } else if (eventType === 'cards_dealt') {
         console.log('🎴 Cards dealt - need full refresh for initial card data');
         // Only for cards dealt, we need a full refresh since it's initial card distribution
@@ -368,6 +387,15 @@ export default function GamePage() {
     }
   };
 
+  const handleRerollDeceased = async (attribute: 'name' | 'identity' | 'estate' | 'all') => {
+    if (!gameState || !isEstateKeeper) return;
+    
+    const success = await rerollDeceasedAttribute(gameState.id, playerId, attribute);
+    if (success) {
+      // Don't manually reload - let real-time updates handle it
+    }
+  };
+
   const getCardColor = (type: string) => {
     switch (type) {
       case 'identity': return 'border-blue-400 bg-blue-900/20';
@@ -400,6 +428,13 @@ export default function GamePage() {
         return `Turn advanced to ${nextPlayerName} (Round ${eventData.new_round})`;
       case 'player_turn_ended':
         return `${playerName} ended their turn`;
+      case 'deceased_rerolled':
+        const attributes = eventData.rerolled_attributes || [];
+        if (attributes.length === 3) {
+          return `Estate Keeper re-rolled all deceased attributes`;
+        } else {
+          return `Estate Keeper re-rolled deceased ${attributes.join(', ')}`;
+        }
       default:
         return `${event.event_type}: ${JSON.stringify(eventData)}`;
     }
@@ -621,20 +656,76 @@ export default function GamePage() {
             {/* Deceased Info */}
             <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-amber-500/20">
               <h3 className="text-2xl font-bold text-amber-300 mb-4 text-center">💀 The Deceased 💀</h3>
-              <div className="text-center space-y-2">
-                <div className="text-xl font-bold text-amber-200">{gameState.deceased_name}</div>
-                <div className="text-amber-100">
-                  <strong>Identity:</strong> {gameState.deceased_identity}
-                </div>
-                <div className="text-amber-100">
-                  <strong>Estate:</strong> {gameState.deceased_estate}
-                </div>
-                {gameState.game_settings?.mode === 'desi' && (
-                  <div className="text-xs text-green-300 mt-2">
-                    🏠 Desi Mode Active
+              
+              {/* Show deceased info only to estate keeper during waiting, or to everyone during playing */}
+              {(isEstateKeeper && gameState.status === 'waiting') || gameState.status === 'playing' ? (
+                <div className="text-center space-y-2">
+                  <div className="text-xl font-bold text-amber-200">{gameState.deceased_name}</div>
+                  <div className="text-amber-100">
+                    <strong>Identity:</strong> {gameState.deceased_identity}
                   </div>
-                )}
-              </div>
+                  <div className="text-amber-100">
+                    <strong>Estate:</strong> {gameState.deceased_estate}
+                  </div>
+                  {gameState.game_settings?.mode === 'desi' && (
+                    <div className="text-xs text-green-300 mt-2">
+                      🏠 Desi Mode Active
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center text-amber-200">
+                  <div className="text-lg mb-2">🤫 Deceased details hidden</div>
+                  <div className="text-sm text-amber-300">
+                    The Estate Keeper is preparing the case...
+                  </div>
+                  {gameState.game_settings?.mode === 'desi' && (
+                    <div className="text-xs text-green-300 mt-2">
+                      🏠 Desi Mode Active
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Re-roll controls - only visible to estate keeper during waiting */}
+              {isEstateKeeper && gameState.status === 'waiting' && (
+                <div className="mt-6 pt-4 border-t border-purple-500/20">
+                  <h4 className="text-lg font-bold text-purple-300 mb-3 text-center">
+                    🎲 Re-roll Deceased Attributes
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => handleRerollDeceased('name')}
+                        className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-3 py-2 rounded transition-colors"
+                      >
+                        Re-roll Name
+                      </button>
+                      <button
+                        onClick={() => handleRerollDeceased('identity')}
+                        className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-3 py-2 rounded transition-colors"
+                      >
+                        Re-roll Identity
+                      </button>
+                      <button
+                        onClick={() => handleRerollDeceased('estate')}
+                        className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-3 py-2 rounded transition-colors"
+                      >
+                        Re-roll Estate
+                      </button>
+                      <button
+                        onClick={() => handleRerollDeceased('all')}
+                        className="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2 rounded transition-colors"
+                      >
+                        Re-roll All
+                      </button>
+                    </div>
+                    <div className="text-xs text-purple-300 text-center">
+                      💡 Make sure the identity matches the estate for better gameplay
+                    </div>
+                  </div>
+                </div>
+              )}
               
               {/* Estate Items - Only visible to Estate Keeper */}
               {isEstateKeeper && gameState.deceased_estate_items && (
@@ -660,75 +751,7 @@ export default function GamePage() {
               )}
             </div>
 
-            {/* Game Status */}
-            <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-amber-500/20">
-              <h3 className="text-xl font-bold text-amber-300 mb-4 text-center">Game Status</h3>
-              <div className="text-center space-y-2">
-                {gameState.status === 'waiting' && (
-                  <div className="text-amber-200">
-                    {isHost ? 'Select an Estate Keeper to start' : 'Waiting for host to start...'}
-                  </div>
-                )}
-                {gameState.status === 'playing' && (
-                  <div className="space-y-2">
-                    <div className="text-green-200">
-                      Round {gameState.current_round} of {gameState.max_rounds}: {ROUND_NAMES[gameState.current_round as keyof typeof ROUND_NAMES] || 'Unknown Round'}
-                    </div>
-                    {estateKeeper && (
-                      <div className="text-purple-200">
-                        Estate Keeper: <span className="font-bold">{estateKeeper.name}</span> ⚖️
-                      </div>
-                    )}
-                    {currentTurnPlayer && (
-                      <div className="text-blue-200">
-                        Current Turn: <span className="font-bold text-blue-300">{currentTurnPlayer.name}</span>
-                        {isMyTurn && !isEstateKeeper && (
-                          <div className="mt-2">
-                            <button
-                              onClick={handleEndTurn}
-                              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
-                            >
-                              End My Turn
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
 
-            {/* Host Controls */}
-            {isHost && gameState.status === 'waiting' && (
-              <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-amber-500/20">
-                <h3 className="text-xl font-bold text-amber-300 mb-4">Host Controls</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-amber-200 mb-2">Select Estate Keeper:</label>
-                    <select
-                      value={selectedPlayer}
-                      onChange={(e) => setSelectedPlayer(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-amber-500/30 text-amber-50"
-                    >
-                      <option value="">Choose player...</option>
-                      {gameState.players.map(player => (
-                        <option key={player.id} value={player.id}>
-                          {player.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <button
-                    onClick={() => selectedPlayer && handleSetEstateKeeper(selectedPlayer)}
-                    disabled={!selectedPlayer}
-                    className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
-                  >
-                    Set Estate Keeper
-                  </button>
-                </div>
-              </div>
-            )}
 
             {/* Estate Keeper Controls */}
             {isEstateKeeper && (
@@ -963,70 +986,130 @@ export default function GamePage() {
             </div>
           )}
 
-          {/* Right Column - Leaderboard */}
-          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-amber-500/20">
-            <h3 className="text-2xl font-bold text-amber-300 mb-6 text-center">
-              🏆 Leaderboard
-            </h3>
-            
-            <div className="space-y-3">
-              {displayPlayers
-                .sort((a, b) => b.score - a.score)
-                .map((player, index) => (
-                <div
-                  key={player.id}
-                  className={`p-3 rounded-lg border ${
-                    index === 0 && player.score > 0
-                      ? 'border-amber-400 bg-amber-900/20'
-                      : currentTurnPlayer?.id === player.id
-                      ? 'border-blue-400 bg-blue-900/20'
-                      : 'border-gray-400 bg-gray-900/20'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="text-lg font-bold text-amber-200">
-                        #{index + 1}
+          {/* Right Column - Game Status, Host Controls & Leaderboard */}
+          <div className="space-y-6">
+            {/* Game Status */}
+            <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-amber-500/20">
+              <h3 className="text-xl font-bold text-amber-300 mb-4 text-center">Game Status</h3>
+              <div className="text-center space-y-2">
+                {gameState.status === 'waiting' && (
+                  <div className="text-amber-200">
+                    {isHost ? 'Select an Estate Keeper to start' : 'Waiting for host to start...'}
+                  </div>
+                )}
+                {gameState.status === 'playing' && (
+                  <div className="space-y-2">
+                    <div className="text-green-200">
+                      Round {gameState.current_round} of {gameState.max_rounds}: {ROUND_NAMES[gameState.current_round as keyof typeof ROUND_NAMES] || 'Unknown Round'}
+                    </div>
+                    {estateKeeper && (
+                      <div className="text-purple-200">
+                        Estate Keeper: <span className="font-bold">{estateKeeper.name}</span> ⚖️
                       </div>
-                      <div>
-                        <div className="font-bold">
-                          {player.name}
-                          {player.is_host && <span className="text-amber-300 ml-1">👑</span>}
-                          {currentTurnPlayer?.id === player.id && gameState.status === 'playing' && (
-                            <span className="text-blue-300 ml-1">🔵</span>
-                          )}
-                          {player.id === playerId && <span className="text-green-300 ml-1">(You)</span>}
-                        </div>
-                        {gameState.status === 'playing' && player.cards && player.id !== playerId && !isEstateKeeper && (
-                          <div className="text-xs text-gray-400">
-                            {player.cards.identity ? 1 : 0}I, {player.cards.relationship ? 1 : 0}R, {(player.cards.backstory || []).length}B, {((player.cards as any).objections || []).length}O
+                    )}
+                    {currentTurnPlayer && (
+                      <div className="text-blue-200">
+                        Current Turn: <span className="font-bold text-blue-300">{currentTurnPlayer.name}</span>
+                        {isMyTurn && !isEstateKeeper && (
+                          <div className="mt-2">
+                            <button
+                              onClick={handleEndTurn}
+                              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                            >
+                              End My Turn
+                            </button>
                           </div>
                         )}
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-amber-200">
-                        {player.score}
-                      </div>
-                      <div className="text-xs text-gray-400">points</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {gameState.status === 'playing' && (
-              <div className="mt-6 pt-4 border-t border-amber-500/20">
-                <div className="text-center text-sm text-amber-200">
-                  Round {gameState.current_round} of {gameState.max_rounds}: {ROUND_NAMES[gameState.current_round as keyof typeof ROUND_NAMES] || 'Unknown Round'}
-                </div>
-                {estateKeeper && (
-                  <div className="text-center text-xs text-purple-200 mt-1">
-                    Estate Keeper: {estateKeeper.name} ⚖️
+                    )}
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* Host Controls */}
+            {isHost && gameState.status === 'waiting' && (
+              <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-amber-500/20">
+                <h3 className="text-xl font-bold text-amber-300 mb-4">Host Controls</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-amber-200 mb-2">Select Estate Keeper:</label>
+                    <select
+                      value={selectedPlayer}
+                      onChange={(e) => setSelectedPlayer(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-amber-500/30 text-amber-50"
+                    >
+                      <option value="">Choose player...</option>
+                      {gameState.players.map(player => (
+                        <option key={player.id} value={player.id}>
+                          {player.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <button
+                    onClick={() => selectedPlayer && handleSetEstateKeeper(selectedPlayer)}
+                    disabled={!selectedPlayer}
+                    className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    Set Estate Keeper
+                  </button>
+                </div>
+              </div>
             )}
+
+            {/* Leaderboard */}
+            <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-amber-500/20">
+              <h3 className="text-2xl font-bold text-amber-300 mb-6 text-center">
+                🏆 Leaderboard
+              </h3>
+              
+              <div className="space-y-3">
+                {displayPlayers
+                  .sort((a, b) => b.score - a.score)
+                  .map((player, index) => (
+                  <div
+                    key={player.id}
+                    className={`p-3 rounded-lg border ${
+                      index === 0 && player.score > 0
+                        ? 'border-amber-400 bg-amber-900/20'
+                        : currentTurnPlayer?.id === player.id
+                        ? 'border-blue-400 bg-blue-900/20'
+                        : 'border-gray-400 bg-gray-900/20'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="text-lg font-bold text-amber-200">
+                          #{index + 1}
+                        </div>
+                        <div>
+                          <div className="font-bold">
+                            {player.name}
+                            {player.is_host && <span className="text-amber-300 ml-1">👑</span>}
+                            {currentTurnPlayer?.id === player.id && gameState.status === 'playing' && (
+                              <span className="text-blue-300 ml-1">🔵</span>
+                            )}
+                            {player.id === playerId && <span className="text-green-300 ml-1">(You)</span>}
+                          </div>
+                          {gameState.status === 'playing' && player.cards && player.id !== playerId && !isEstateKeeper && (
+                            <div className="text-xs text-gray-400">
+                              {player.cards.identity ? 1 : 0}I, {player.cards.relationship ? 1 : 0}R, {(player.cards.backstory || []).length}B, {((player.cards as any).objections || []).length}O
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-amber-200">
+                          {player.score}
+                        </div>
+                        <div className="text-xs text-gray-400">points</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
