@@ -16,6 +16,13 @@ export interface Player {
   };
 }
 
+export const ROUND_NAMES = {
+  1: 'Opening Statements',
+  2: 'Interrogation',
+  3: 'Recess',
+  4: 'Final Statements'
+};
+
 export interface GameState {
   id: string;
   game_code: string;
@@ -28,7 +35,8 @@ export interface GameState {
   deceased_name: string | null;
   deceased_identity: string | null;
   deceased_estate: string | null;
-  game_settings?: { mode?: 'english' | 'desi' };
+  deceased_estate_items?: string[];
+  game_settings?: { mode?: 'english' | 'desi'; deceased_estate_items?: string[] };
   players: Player[];
 }
 
@@ -71,7 +79,11 @@ export async function createGame(hostName: string, gameMode: 'english' | 'desi' 
       .update({
         deceased_name: deceased.name,
         deceased_identity: deceased.identity,
-        deceased_estate: deceased.estate
+        deceased_estate: deceased.estate,
+        game_settings: { 
+          mode: gameMode, 
+          deceased_estate_items: deceased.estateItems 
+        }
       })
       .eq('id', gameData.id);
 
@@ -82,12 +94,13 @@ export async function createGame(hostName: string, gameMode: 'english' | 'desi' 
         ...gameData,
         status: (gameData.status || 'waiting') as 'waiting' | 'setup' | 'playing' | 'finished',
         current_round: gameData.current_round || 1,
-        max_rounds: gameData.max_rounds || 3,
+        max_rounds: gameData.max_rounds || 4,
         current_player_turn: (gameData as any).current_player_turn || 0,
         deceased_name: deceased.name,
         deceased_identity: deceased.identity,
         deceased_estate: deceased.estate,
-        game_settings: (gameData.game_settings as { mode?: 'english' | 'desi' }) || { mode: gameMode },
+        deceased_estate_items: deceased.estateItems,
+        game_settings: { mode: gameMode, deceased_estate_items: deceased.estateItems },
         players: [{
           id: playerId,
           name: hostName,
@@ -192,14 +205,18 @@ export async function getGameState(gameId: string, playerId?: string): Promise<{
       cards: (p.cards as any) || { backstory: [] }
     }));
 
+    // Extract estate items from game_settings 
+    const estateItems = (gameData.game_settings as any)?.deceased_estate_items;
+
     return {
       game: {
         ...gameData,
         status: (gameData.status || 'waiting') as 'waiting' | 'setup' | 'playing' | 'finished',
         current_round: gameData.current_round || 1,
-        max_rounds: gameData.max_rounds || 3,
+        max_rounds: gameData.max_rounds || 4,
         current_player_turn: (gameData as any).current_player_turn || 0,
-        game_settings: (gameData.game_settings as { mode?: 'english' | 'desi' }) || { mode: 'english' },
+        deceased_estate_items: estateItems,
+        game_settings: (gameData.game_settings as { mode?: 'english' | 'desi'; deceased_estate_items?: string[] }) || { mode: 'english' },
         players
       },
       playerId: playerId || players[0]?.id || ''
@@ -543,7 +560,7 @@ export async function nextTurn(gameId: string, estateKeeperId: string): Promise<
     const nonEstateKeeperPlayers = playersData.filter(p => !p.is_estate_keeper);
     const currentTurn = gameData.current_player_turn || 0;
     const currentRound = gameData.current_round || 1;
-    const maxRounds = gameData.max_rounds || 3;
+    const maxRounds = gameData.max_rounds || 4;
 
     let newTurn = currentTurn + 1;
     let newRound = currentRound;

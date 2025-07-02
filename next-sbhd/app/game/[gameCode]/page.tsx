@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getGameState, setEstateKeeper, dealCards, updatePlayerScore, drawCardForPlayer, nextTurn, endPlayerTurn, subscribeToGameEvents, getGameEvents, GameState, Player, GameEvent } from '@/utils/gameUtils';
-import { drawRandomCard, GAME_CARDS } from '@/utils/gameCards';
+import { getGameState, setEstateKeeper, dealCards, updatePlayerScore, drawCardForPlayer, nextTurn, endPlayerTurn, subscribeToGameEvents, getGameEvents, GameState, Player, GameEvent, ROUND_NAMES } from '@/utils/gameUtils';
+import { drawRandomCard, GAME_CARDS, getEstateItemsForDisplay } from '@/utils/gameCards';
 import { supabase } from '@/utils/db/supabase';
 
 export default function GamePage() {
@@ -88,7 +88,8 @@ export default function GamePage() {
       
       if (payload.eventType === 'UPDATE' && updatedPlayer) {
         console.log('👥 UPDATE event for player:', updatedPlayer.id);
-        // Update specific player in state
+        // Update specific player in state, but SKIP card updates to avoid duplicates
+        // Card updates are handled by the card_drawn game event
         setGameState(prevState => {
           if (!prevState) return prevState;
           
@@ -97,7 +98,7 @@ export default function GamePage() {
               ? {
                   ...player,
                   score: updatedPlayer.score !== undefined ? updatedPlayer.score : player.score,
-                  cards: updatedPlayer.cards || player.cards,
+                  // Don't update cards here - let card_drawn events handle this to avoid duplicates
                   is_estate_keeper: updatedPlayer.is_estate_keeper !== undefined ? updatedPlayer.is_estate_keeper : player.is_estate_keeper,
                   is_ready: updatedPlayer.is_ready !== undefined ? updatedPlayer.is_ready : player.is_ready
                 }
@@ -545,12 +546,12 @@ export default function GamePage() {
                   </ul>
                 </div>
                 <div className="bg-purple-900/20 p-4 rounded-lg border border-purple-500/20">
-                  <h4 className="font-bold text-purple-200 mb-2">Game Flow:</h4>
+                  <h4 className="font-bold text-purple-200 mb-2">Game Flow (4 Rounds):</h4>
                   <ol className="list-decimal list-inside space-y-1 text-sm">
-                    <li><strong>Opening Statements:</strong> Players introduce themselves and their claim</li>
-                    <li><strong>Interrogation:</strong> Ask each player one direct question</li>
-                    <li><strong>Recess:</strong> Players question each other "off the record"</li>
-                    <li><strong>Final Statements:</strong> Last chance for players to make their case</li>
+                    <li><strong>Round 1 - Opening Statements:</strong> Players introduce themselves and their claim</li>
+                    <li><strong>Round 2 - Interrogation:</strong> Ask each player one direct question</li>
+                    <li><strong>Round 3 - Recess:</strong> Players question each other "off the record"</li>
+                    <li><strong>Round 4 - Final Statements:</strong> Last chance for players to make their case</li>
                   </ol>
                 </div>
               </div>
@@ -634,6 +635,29 @@ export default function GamePage() {
                   </div>
                 )}
               </div>
+              
+              {/* Estate Items - Only visible to Estate Keeper */}
+              {isEstateKeeper && gameState.deceased_estate_items && (
+                <div className="mt-6 pt-4 border-t border-amber-500/20">
+                  <h4 className="text-lg font-bold text-purple-300 mb-3 text-center">
+                    ⚖️ Detailed Estate Inventory (Estate Keeper Only)
+                  </h4>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {gameState.deceased_estate_items.map((item, index) => (
+                      <div
+                        key={index}
+                        className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-3 text-sm text-amber-100"
+                      >
+                        <span className="text-purple-300 font-bold mr-2">{index + 1}.</span>
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 text-xs text-purple-300 text-center">
+                    💡 Use this information to guide scoring and story decisions
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Game Status */}
@@ -648,7 +672,7 @@ export default function GamePage() {
                 {gameState.status === 'playing' && (
                   <div className="space-y-2">
                     <div className="text-green-200">
-                      Round {gameState.current_round} of {gameState.max_rounds}
+                      Round {gameState.current_round} of {gameState.max_rounds}: {ROUND_NAMES[gameState.current_round as keyof typeof ROUND_NAMES] || 'Unknown Round'}
                     </div>
                     {estateKeeper && (
                       <div className="text-purple-200">
@@ -994,7 +1018,7 @@ export default function GamePage() {
             {gameState.status === 'playing' && (
               <div className="mt-6 pt-4 border-t border-amber-500/20">
                 <div className="text-center text-sm text-amber-200">
-                  Round {gameState.current_round} of {gameState.max_rounds}
+                  Round {gameState.current_round} of {gameState.max_rounds}: {ROUND_NAMES[gameState.current_round as keyof typeof ROUND_NAMES] || 'Unknown Round'}
                 </div>
                 {estateKeeper && (
                   <div className="text-center text-xs text-purple-200 mt-1">

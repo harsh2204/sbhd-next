@@ -13,7 +13,7 @@ CREATE TABLE games (
   host_id UUID,
   estate_keeper_id UUID,
   current_round INTEGER DEFAULT 1,
-  max_rounds INTEGER DEFAULT 3,
+  max_rounds INTEGER DEFAULT 4,
   current_player_turn INTEGER DEFAULT 0,
   deceased_name VARCHAR(255),
   deceased_identity VARCHAR(255),
