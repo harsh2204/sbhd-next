@@ -645,7 +645,7 @@ export async function endPlayerTurn(gameId: string, playerId: string): Promise<b
 export async function rerollDeceasedAttribute(
   gameId: string, 
   estateKeeperId: string, 
-  attribute: 'name' | 'identity' | 'estate' | 'all'
+  attribute: 'all' = 'all'  // Only support 'all' now - single reroll button
 ): Promise<boolean> {
   try {
     // Verify the requester is the estate keeper and game is in waiting state
@@ -663,7 +663,7 @@ export async function rerollDeceasedAttribute(
     // Get current game data to check status and mode
     const { data: gameData } = await supabase
       .from('games')
-      .select('status, game_settings, deceased_name, deceased_identity, deceased_estate')
+      .select('status, game_settings')
       .eq('id', gameId)
       .single();
 
@@ -673,74 +673,24 @@ export async function rerollDeceasedAttribute(
 
     const isDesi = (gameData.game_settings as any)?.mode === 'desi';
     
-    // Generate new deceased data based on what needs to be re-rolled
-    let updateData: any = {};
-    let eventData: any = { rerolled_attributes: [] };
-
-    if (attribute === 'all') {
-      const newDeceased = generateDeceased(isDesi);
-      updateData = {
-        deceased_name: newDeceased.name,
-        deceased_identity: newDeceased.identity,
-        deceased_estate: newDeceased.estate,
-        game_settings: { 
-          mode: isDesi ? 'desi' : 'english', 
-          deceased_estate_items: newDeceased.estateItems 
-        }
-      };
-      eventData.rerolled_attributes = ['name', 'identity', 'estate'];
-      eventData.new_name = newDeceased.name;
-      eventData.new_identity = newDeceased.identity;
-      eventData.new_estate = newDeceased.estate;
-    } else {
-      // Re-roll individual attributes
-      if (attribute === 'name') {
-        const nameSet = isDesi ? DESI_DECEASED_NAMES : DECEASED_NAMES;
-        const newName = nameSet[Math.floor(Math.random() * nameSet.length)];
-        updateData.deceased_name = newName;
-        eventData.rerolled_attributes = ['name'];
-        eventData.new_name = newName;
-      } else if (attribute === 'identity') {
-        const newIdentity = drawRandomCard('identity', [], isDesi);
-        updateData.deceased_identity = newIdentity;
-        eventData.rerolled_attributes = ['identity'];
-        eventData.new_identity = newIdentity;
-      } else if (attribute === 'estate') {
-        // For estate re-roll, we need to generate a new estate that matches the current identity
-        const currentIdentity = gameData.deceased_identity;
-        const estateThemes = isDesi ? DESI_THEMATIC_ESTATES : THEMATIC_ESTATES;
-        const identityMapping = isDesi ? DESI_IDENTITY_ESTATE_MAPPING : IDENTITY_ESTATE_MAPPING;
-        
-        // Find which theme the current identity belongs to
-        let matchingTheme = 'business'; // default fallback
-        if (currentIdentity) {
-          for (const [theme, identities] of Object.entries(identityMapping)) {
-            if (identities.includes(currentIdentity)) {
-              matchingTheme = theme;
-              break;
-            }
-          }
-        }
-        
-        // If no matching theme found, randomly assign a theme
-        if (!estateThemes[matchingTheme as keyof typeof estateThemes]) {
-          const themes = Object.keys(estateThemes);
-          matchingTheme = themes[Math.floor(Math.random() * themes.length)];
-        }
-        
-        // Select random estate from the matching theme
-        const themeEstates = estateThemes[matchingTheme as keyof typeof estateThemes];
-        const estateData = themeEstates[Math.floor(Math.random() * themeEstates.length)];
-        
-        updateData.deceased_estate = estateData.summary;
-        updateData.game_settings = {
-          ...(gameData.game_settings as any),
-          deceased_estate_items: estateData.items
-        };
-        eventData.rerolled_attributes = ['estate'];
-        eventData.new_estate = estateData.summary;
+    // Always generate completely new deceased with matching identity and estate
+    const newDeceased = generateDeceased(isDesi);
+    const updateData = {
+      deceased_name: newDeceased.name,
+      deceased_identity: newDeceased.identity,
+      deceased_estate: newDeceased.estate,
+      game_settings: { 
+        mode: isDesi ? 'desi' : 'english', 
+        deceased_estate_items: newDeceased.estateItems 
       }
-    }
+    };
+    
+    const eventData = {
+      rerolled_attributes: ['name', 'identity', 'estate'],
+      new_name: newDeceased.name,
+      new_identity: newDeceased.identity,
+      new_estate: newDeceased.estate
+    };
 
     // Update the game with new deceased data
     const { error: updateError } = await supabase
@@ -762,7 +712,7 @@ export async function rerollDeceasedAttribute(
 
     return true;
   } catch (error) {
-    console.error('Error re-rolling deceased attribute:', error);
+    console.error('Error re-rolling deceased:', error);
     return false;
   }
 }
