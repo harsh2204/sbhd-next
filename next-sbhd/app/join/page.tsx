@@ -9,27 +9,29 @@ export default async function JoinPage({ searchParams }: JoinPageProps) {
   const gameCode = params.code?.toUpperCase() || '';
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 animate-fade-in-up">
+      <div className="funeral-container max-w-md w-full">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-amber-300 mb-2">
-            ⚰️ Join Game ⚰️
+        <div className="text-center mb-12">
+          <h1 className="funeral-title text-4xl md:text-5xl mb-4">
+            ⚰️ Join Estate ⚰️
           </h1>
-          <p className="text-amber-100">
-            Enter your details to join the inheritance battle!
+          <p className="funeral-subtitle">
+            Enter the sacred chambers to claim your inheritance
           </p>
         </div>
 
-        <JoinForm initialGameCode={gameCode} />
+        <div className="funeral-card-ornate p-8">
+          <JoinForm initialGameCode={gameCode} />
+        </div>
 
         {/* Navigation */}
         <div className="text-center mt-8">
           <a
             href="/"
-            className="text-amber-300 hover:text-amber-200 underline"
+            className="funeral-button inline-block"
           >
-            ← Back to Home
+            ← Return to Main Hall
           </a>
         </div>
       </div>

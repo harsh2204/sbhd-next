@@ -15,45 +15,98 @@ export default function PlayerCards({
   onToggleCollapse,
   title 
 }: PlayerCardsProps) {
-  const getCardColor = (type: string) => {
+  const getCardStyle = (type: string) => {
     switch (type) {
-      case 'identity': return 'border-blue-400 bg-blue-900/20';
-      case 'relationship': return 'border-red-400 bg-red-900/20';
-      case 'backstory': return 'border-green-400 bg-green-900/20';
-      case 'objection': return 'border-gray-400 bg-gray-900/20';
-      default: return 'border-amber-400 bg-amber-900/20';
+      case 'identity': 
+        return 'game-card-identity';
+      case 'relationship': 
+        return 'game-card-relationship';
+      case 'backstory': 
+        return 'game-card-backstory';
+      case 'objection': 
+        return 'game-card-objection';
+      default: 
+        return 'funeral-card';
+    }
+  };
+
+  const getCardIcon = (type: string) => {
+    switch (type) {
+      case 'identity': return '🎭';
+      case 'relationship': return '💝';
+      case 'backstory': return '📜';
+      case 'objection': return '⚖️';
+      default: return '🎴';
+    }
+  };
+
+  const getCardTitle = (type: string) => {
+    switch (type) {
+      case 'identity': return 'IDENTITY';
+      case 'relationship': return 'RELATIONSHIP';
+      case 'backstory': return 'BACKSTORY';
+      case 'objection': return 'OBJECTION';
+      default: return 'CARD';
     }
   };
 
   if (!player.cards) return null;
 
   const content = (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {player.cards.identity && (
-        <div className={`p-4 rounded-lg border-2 ${getCardColor('identity')}`}>
-          <div className="text-sm text-blue-300 font-bold mb-2">IDENTITY</div>
-          <div className="text-lg">{player.cards.identity}</div>
+        <div className={`${getCardStyle('identity')} p-6 rounded-xl relative overflow-hidden`}>
+          <div className="absolute top-0 right-0 text-4xl opacity-20 transform rotate-12 translate-x-2 -translate-y-2">
+            {getCardIcon('identity')}
+          </div>
+          <div className="text-sm font-bold mb-3 text-blue-200 font-['Cinzel'] tracking-wider">
+            {getCardIcon('identity')} {getCardTitle('identity')}
+          </div>
+          <div className="text-lg text-white font-['Crimson_Text'] leading-relaxed">
+            {player.cards.identity}
+          </div>
         </div>
       )}
       
       {player.cards.relationship && (
-        <div className={`p-4 rounded-lg border-2 ${getCardColor('relationship')}`}>
-          <div className="text-sm text-red-300 font-bold mb-2">RELATIONSHIP</div>
-          <div className="text-lg">{player.cards.relationship}</div>
+        <div className={`${getCardStyle('relationship')} p-6 rounded-xl relative overflow-hidden`}>
+          <div className="absolute top-0 right-0 text-4xl opacity-20 transform rotate-12 translate-x-2 -translate-y-2">
+            {getCardIcon('relationship')}
+          </div>
+          <div className="text-sm font-bold mb-3 text-red-200 font-['Cinzel'] tracking-wider">
+            {getCardIcon('relationship')} {getCardTitle('relationship')}
+          </div>
+          <div className="text-lg text-white font-['Crimson_Text'] leading-relaxed">
+            {player.cards.relationship}
+          </div>
         </div>
       )}
       
       {(player.cards.backstory || []).map((card, idx) => (
-        <div key={idx} className={`p-4 rounded-lg border-2 ${getCardColor('backstory')}`}>
-          <div className="text-sm text-green-300 font-bold mb-2">BACKSTORY {idx + 1}</div>
-          <div className="text-lg">{card}</div>
+        <div key={idx} className={`${getCardStyle('backstory')} p-6 rounded-xl relative overflow-hidden`}>
+          <div className="absolute top-0 right-0 text-4xl opacity-20 transform rotate-12 translate-x-2 -translate-y-2">
+            {getCardIcon('backstory')}
+          </div>
+          <div className="text-sm font-bold mb-3 text-green-200 font-['Cinzel'] tracking-wider">
+            {getCardIcon('backstory')} {getCardTitle('backstory')} {idx + 1}
+          </div>
+          <div className="text-lg text-white font-['Crimson_Text'] leading-relaxed">
+            {card}
+          </div>
         </div>
       ))}
       
       {((player.cards as any).objections || []).map((card: string, idx: number) => (
-        <div key={idx} className={`p-4 rounded-lg border-2 ${getCardColor('objection')}`}>
-          <div className="text-sm text-gray-300 font-bold mb-2">OBJECTION {idx + 1}</div>
-          <div className="text-lg">{card}</div>
+        <div key={idx} className={`${getCardStyle('objection')} p-6 rounded-xl relative overflow-hidden`}>
+          <div className="absolute top-0 right-0 text-4xl opacity-20 transform rotate-12 translate-x-2 -translate-y-2">
+            {getCardIcon('objection')}
+          </div>
+          <div className="text-sm font-bold mb-3 text-gray-200 font-['Cinzel'] tracking-wider">
+            {getCardIcon('objection')} {getCardTitle('objection')} {idx + 1}
+          </div>
+          <div className="text-lg text-white font-['Crimson_Text'] leading-relaxed">
+            {card}
+          </div>
         </div>
       ))}
     </div>
@@ -61,21 +114,23 @@ export default function PlayerCards({
 
   if (isCollapsible) {
     return (
-      <div className="border border-purple-500/20 rounded-lg">
+      <div className="funeral-card-ornate overflow-hidden">
         <button
           onClick={onToggleCollapse}
-          className="w-full p-4 text-left bg-purple-900/10 hover:bg-purple-900/20 rounded-t-lg transition-colors flex items-center justify-between"
+          className="w-full p-6 text-left bg-funeral-deep-maroon/30 hover:bg-funeral-burgundy/30 transition-colors duration-300 flex items-center justify-between"
         >
-          <span className="text-lg font-bold text-purple-300">
-            {title || '🎴 View Cards'}
+          <span className="text-xl font-bold text-funeral-gold font-['Cinzel']">
+            {title || '🎴 View Your Cards'}
           </span>
-          <span className="text-purple-300">
-            {isCollapsed ? '▶' : '▼'}
+          <span className="text-funeral-gold text-2xl transform transition-transform duration-300" style={{
+            transform: isCollapsed ? 'rotate(0deg)' : 'rotate(90deg)'
+          }}>
+            ▶
           </span>
         </button>
         
         {!isCollapsed && (
-          <div className="p-4">
+          <div className="p-6 bg-funeral-black/20">
             {content}
           </div>
         )}
@@ -84,13 +139,13 @@ export default function PlayerCards({
   }
 
   return (
-    <>
+    <div className="animate-fade-in-up">
       {title && (
-        <h3 className="text-2xl font-bold text-amber-300 mb-6 text-center">
+        <h3 className="text-3xl font-bold text-funeral-gold mb-8 text-center font-['Cinzel']">
           {title}
         </h3>
       )}
       {content}
-    </>
+    </div>
   );
 } 

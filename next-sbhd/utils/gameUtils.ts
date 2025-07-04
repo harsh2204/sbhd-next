@@ -758,6 +758,36 @@ export async function getGameEvents(gameId: string): Promise<GameEvent[]> {
   }
 }
 
+export async function deleteGame(gameId: string, estateKeeperId: string): Promise<boolean> {
+  try {
+    // Verify the requester is the estate keeper
+    const { data: estateKeeperData } = await supabase
+      .from('players')
+      .select('is_estate_keeper')
+      .eq('id', estateKeeperId)
+      .eq('game_id', gameId)
+      .single();
+
+    if (!estateKeeperData?.is_estate_keeper) {
+      throw new Error('Only the estate keeper can delete the game');
+    }
+
+    // Delete the game - this will cascade delete all related records
+    // (players, game_events, card_decks) due to ON DELETE CASCADE constraints
+    const { error } = await supabase
+      .from('games')
+      .delete()
+      .eq('id', gameId);
+
+    if (error) throw error;
+
+    return true;
+  } catch (error) {
+    console.error('Error deleting game:', error);
+    return false;
+  }
+}
+
 export function subscribeToGameEvents(gameId: string, callback: (event: any) => void) {
   console.log('🚀 Setting up subscription for game:', gameId);
   

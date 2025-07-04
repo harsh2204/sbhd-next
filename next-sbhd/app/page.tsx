@@ -26,7 +26,6 @@ export default function HomePage() {
     try {
       const result = await createGame(hostName.trim(), gameMode);
       if (result) {
-        // Store player ID in localStorage
         localStorage.setItem('playerId', result.playerId);
         router.push(`/game/${result.game.game_code}`);
       } else {
@@ -51,7 +50,6 @@ export default function HomePage() {
     try {
       const result = await joinGame(joinCode.trim(), playerName.trim());
       if (result) {
-        // Store player ID in localStorage
         localStorage.setItem('playerId', result.playerId);
         router.push(`/game/${result.game.game_code}`);
       } else {
@@ -65,168 +63,183 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
-      <div className="max-w-4xl w-full">
+    <div className="flex flex-col justify-center items-center p-4 min-h-screen animate-fade-in-up">
+      <div className="w-full funeral-container">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-6xl font-bold text-amber-300 mb-4 drop-shadow-lg">
+        <div className="mb-16 text-center">
+          <h1 className="mb-6 funeral-title animate-ornate-glow">
             ⚰️ SOMEBODY HAS DIED ⚰️
           </h1>
-          <p className="text-xl text-amber-100 mb-6">
-            The hilarious party game about arguing over a dead person's stuff
+          <p className="mb-8 funeral-subtitle">
+            The most wickedly entertaining party game about arguing over a dead person's estate
           </p>
           <button
             onClick={() => setShowRules(!showRules)}
-            className="bg-amber-700 hover:bg-amber-600 text-white px-6 py-2 rounded-lg transition-colors"
+            className="funeral-button"
           >
-            {showRules ? 'Hide Rules' : 'Show Rules'}
+            {showRules ? 'Hide the Sacred Rules' : 'Reveal the Sacred Rules'}
           </button>
         </div>
 
         {/* Rules */}
         {showRules && (
-          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 mb-8 border border-amber-500/20">
-            <h2 className="text-2xl font-bold text-amber-300 mb-4">How to Play</h2>
-            <div className="space-y-4 text-amber-100">
-              <div>
-                <h3 className="font-bold text-amber-200">Setup:</h3>
-                <ul className="list-disc list-inside ml-4 space-y-1">
-                  <li>2-12 players (one is the Estate Keeper)</li>
-                  <li>Each player gets: 1 Identity + 1 Relationship + 2 Backstory cards</li>
-                  <li>Estate Keeper gets all Objection cards</li>
+          <div className="mb-12 funeral-section animate-fade-in-up">
+            <h2 className="text-3xl font-bold text-funeral-gold mb-6 text-center font-['Cinzel']">
+              📜 The Sacred Rules of Inheritance 📜
+            </h2>
+            <div className="grid gap-6 md:grid-cols-3 text-funeral-bone">
+              <div className="p-6 funeral-card">
+                <h3 className="text-xl font-bold text-funeral-gold mb-4 font-['Cinzel']">⚱️ Setup</h3>
+                <ul className="space-y-2 text-sm">
+                  <li>• 2-12 players (one becomes the Estate Keeper)</li>
+                  <li>• Each player receives: 1 Identity + 1 Relationship + 2 Backstory cards</li>
+                  <li>• The Estate Keeper controls all Objection cards</li>
                 </ul>
               </div>
-              <div>
-                <h3 className="font-bold text-amber-200">Gameplay:</h3>
-                <ul className="list-disc list-inside ml-4 space-y-1">
-                  <li>Players take turns arguing why they deserve the inheritance</li>
-                  <li>Use your cards to build compelling (or ridiculous) arguments</li>
-                  <li>Estate Keeper can play Objection cards to challenge arguments</li>
-                  <li>Estate Keeper scores each argument: 4 points (best) to 1 point (worst)</li>
+              <div className="p-6 funeral-card">
+                <h3 className="text-xl font-bold text-funeral-gold mb-4 font-['Cinzel']">⚖️ Gameplay</h3>
+                <ul className="space-y-2 text-sm">
+                  <li>• Players take turns presenting their inheritance claims</li>
+                  <li>• Use your cards to craft compelling (or ridiculous) arguments</li>
+                  <li>• Estate Keeper may challenge with Objection cards</li>
+                  <li>• Arguments scored: 4 points (masterful) to 1 point (pathetic)</li>
                 </ul>
               </div>
-              <div>
-                <h3 className="font-bold text-amber-200">Winning:</h3>
-                <p className="ml-4">Play 3 rounds, then whoever has the most points inherits the estate!</p>
+              <div className="p-6 funeral-card">
+                <h3 className="text-xl font-bold text-funeral-gold mb-4 font-['Cinzel']">👑 Victory</h3>
+                <ul className="space-y-2 text-sm">
+                  <li>• Play 3 rounds of inheritance battles</li>
+                  <li>• Highest total score claims the estate</li>
+                  <li>• May the most cunning mourner prevail!</li>
+                </ul>
               </div>
             </div>
           </div>
         )}
 
         {/* Game Options */}
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid gap-8 mb-12 md:grid-cols-2">
           {/* Create Game */}
-          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-8 border border-amber-500/20">
-            <h2 className="text-3xl font-bold text-amber-300 mb-6 text-center">
-              Create New Game
+          <div className="p-8 funeral-card-ornate">
+            <h2 className="text-2xl font-bold text-funeral-gold mb-6 text-center font-['Cinzel']">
+              🏰 Establish Your Estate
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <label className="block text-amber-200 font-semibold mb-2">
-                  Your Name (Host)
+                <label className="block text-funeral-silver font-semibold mb-3 font-['Cinzel']">
+                  Your Noble Name
                 </label>
                 <input
                   type="text"
                   value={hostName}
                   onChange={(e) => setHostName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-amber-500/30 text-amber-50 focus:border-amber-400 focus:outline-none"
-                  placeholder="Enter your name..."
-                  maxLength={50}
+                  placeholder="Enter your distinguished name..."
+                  className="px-4 py-3 w-full rounded-lg border-2 transition-colors duration-300 bg-funeral-black/50 border-funeral-gold/50 text-funeral-bone placeholder-funeral-silver/50 focus:border-funeral-gold focus:outline-none"
                 />
               </div>
               
               <div>
-                <label className="block text-amber-200 font-semibold mb-2">
-                  Game Mode
+                <label className="block text-funeral-silver font-semibold mb-3 font-['Cinzel']">
+                  Choose Your Realm
                 </label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => setGameMode('english')}
-                    className={`px-4 py-3 rounded-lg border-2 transition-colors ${
+                    className={`p-3 rounded-lg border-2 transition-all duration-300 font-semibold relative ${
                       gameMode === 'english'
-                        ? 'border-amber-400 bg-amber-900/30 text-amber-200'
-                        : 'border-amber-500/30 bg-slate-800 text-amber-100 hover:border-amber-400/50'
+                        ? 'bg-gradient-to-br from-funeral-gold/30 to-funeral-gold/10 text-funeral-gold border-funeral-gold shadow-lg shadow-funeral-gold/30 ring-2 ring-funeral-gold/50'
+                        : 'bg-funeral-black/30 border-funeral-silver/30 text-funeral-silver hover:border-funeral-gold/50 hover:text-funeral-gold'
                     }`}
                   >
-                    <div className="font-semibold">English</div>
-                    <div className="text-sm opacity-80">Original cards</div>
+                    {gameMode === 'english' && (
+                      <div className="absolute inset-0 rounded-lg border bg-funeral-gold/5 border-funeral-gold/20"></div>
+                    )}
+                    <span className="relative z-10">
+                      🇬🇧 English Manor {gameMode === 'english' && '✓'}
+                    </span>
                   </button>
                   <button
                     onClick={() => setGameMode('desi')}
-                    className={`px-4 py-3 rounded-lg border-2 transition-colors ${
+                    className={`p-3 rounded-lg border-2 transition-all duration-300 font-semibold relative ${
                       gameMode === 'desi'
-                        ? 'border-amber-400 bg-amber-900/30 text-amber-200'
-                        : 'border-amber-500/30 bg-slate-800 text-amber-100 hover:border-amber-400/50'
+                        ? 'bg-gradient-to-br from-funeral-gold/30 to-funeral-gold/10 text-funeral-gold border-funeral-gold shadow-lg shadow-funeral-gold/30 ring-2 ring-funeral-gold/50'
+                        : 'bg-funeral-black/30 border-funeral-silver/30 text-funeral-silver hover:border-funeral-gold/50 hover:text-funeral-gold'
                     }`}
                   >
-                    <div className="font-semibold">Desi Mode</div>
-                    <div className="text-sm opacity-80">Family-friendly</div>
+                    {gameMode === 'desi' && (
+                      <div className="absolute inset-0 rounded-lg border bg-funeral-gold/5 border-funeral-gold/20"></div>
+                    )}
+                    <span className="relative z-10">
+                      🇮🇳 Desi Haveli {gameMode === 'desi' && '✓'}
+                    </span>
                   </button>
                 </div>
-                <div className="text-xs text-amber-300/70 mt-2">
-                  {gameMode === 'desi' 
-                    ? 'Hindi/Urdu cards with familiar family situations' 
-                    : 'Original English cards with Western references'
-                  }
+                <div className="mt-3">
+                  <button
+                    disabled={true}
+                    className="p-3 w-full font-semibold rounded-lg border-2 transition-all duration-300 cursor-not-allowed bg-funeral-black/20 border-funeral-silver/20 text-funeral-silver/40"
+                  >
+                    🤖 AI Dream Realm (Coming Soon)
+                  </button>
                 </div>
               </div>
               
               <button
                 onClick={handleCreateGame}
-                disabled={loading || !hostName.trim()}
-                className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
+                disabled={loading}
+                className="w-full funeral-button disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Creating...' : 'Create Game'}
+                {loading ? 'Establishing Estate...' : 'Create Your Estate'}
               </button>
             </div>
           </div>
 
           {/* Join Game */}
-          <div className="bg-black/30 backdrop-blur-sm rounded-xl p-8 border border-amber-500/20">
-            <h2 className="text-3xl font-bold text-amber-300 mb-6 text-center">
-              Join Existing Game
+          <div className="p-8 funeral-card-ornate">
+            <h2 className="text-2xl font-bold text-funeral-gold mb-6 text-center font-['Cinzel']">
+              ⚔️ Join the Battle
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <label className="block text-amber-200 font-semibold mb-2">
-                  Game Code
+                <label className="block text-funeral-silver font-semibold mb-3 font-['Cinzel']">
+                  Estate Code
                 </label>
                 <input
                   type="text"
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                  className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-amber-500/30 text-amber-50 focus:border-amber-400 focus:outline-none uppercase tracking-wider"
-                  placeholder="ABCDEF"
-                  maxLength={10}
+                  placeholder="Enter the sacred code..."
+                  className="px-4 py-3 w-full font-mono tracking-wider rounded-lg border-2 transition-colors duration-300 bg-funeral-black/50 border-funeral-gold/50 text-funeral-bone placeholder-funeral-silver/50 focus:border-funeral-gold focus:outline-none"
                 />
               </div>
+              
               <div>
-                <label className="block text-amber-200 font-semibold mb-2">
+                <label className="block text-funeral-silver font-semibold mb-3 font-['Cinzel']">
                   Your Name
                 </label>
                 <input
                   type="text"
                   value={playerName}
                   onChange={(e) => setPlayerName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-amber-500/30 text-amber-50 focus:border-amber-400 focus:outline-none"
                   placeholder="Enter your name..."
-                  maxLength={50}
+                  className="px-4 py-3 w-full rounded-lg border-2 transition-colors duration-300 bg-funeral-black/50 border-funeral-gold/50 text-funeral-bone placeholder-funeral-silver/50 focus:border-funeral-gold focus:outline-none"
                 />
               </div>
+              
               <button
                 onClick={handleJoinGame}
-                disabled={loading || !joinCode.trim() || !playerName.trim()}
-                className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
+                disabled={loading}
+                className="w-full funeral-button disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Joining...' : 'Join Game'}
+                {loading ? 'Entering the Fray...' : 'Join the Battle'}
               </button>
               
-              <div className="text-center mt-4">
+              <div className="mt-4 text-center">
                 <button
                   onClick={() => router.push('/join')}
-                  className="text-purple-300 hover:text-purple-200 underline text-sm"
+                  className="text-sm underline transition-colors duration-300 text-funeral-silver hover:text-funeral-gold"
                 >
-                  Use dedicated join page →
+                  Use the dedicated joining chamber →
                 </button>
               </div>
             </div>
@@ -235,14 +248,18 @@ export default function HomePage() {
 
         {/* Error Message */}
         {error && (
-          <div className="mt-6 bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded-lg text-center">
-            {error}
+          <div className="p-4 mb-8 border-red-500 funeral-card bg-red-900/20 animate-fade-in-up">
+            <div className="font-semibold text-center text-red-300">
+              ⚠️ {error}
+            </div>
           </div>
         )}
 
-        {/* Footer */}
-        <div className="text-center mt-12 text-amber-300/70">
-          <p>Supports 2-12 players • Real-time multiplayer • No registration required</p>
+        {/* Footer Info */}
+        <div className="text-center text-funeral-silver/70">
+          <p className="font-['Cinzel'] text-lg">
+            ⚱️ Supports 2-12 players • Real-time multiplayer • No registration required ⚱️
+          </p>
         </div>
       </div>
     </div>

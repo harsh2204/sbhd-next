@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { getGameState, setEstateKeeper, dealCards, updatePlayerScore, drawCardForPlayer, nextTurn, endPlayerTurn, subscribeToGameEvents, getGameEvents, rerollDeceasedAttribute, GameState, Player, GameEvent, ROUND_NAMES } from '@/utils/gameUtils';
+import { getGameState, setEstateKeeper, dealCards, updatePlayerScore, drawCardForPlayer, nextTurn, endPlayerTurn, subscribeToGameEvents, getGameEvents, rerollDeceasedAttribute, deleteGame, GameState, Player, GameEvent, ROUND_NAMES } from '@/utils/gameUtils';
 import { supabase } from '@/utils/db/supabase';
 import GameHeader from '@/components/game/GameHeader';
 import GameRules from '@/components/game/GameRules';
@@ -324,6 +324,17 @@ export default function GameClient({ gameCode }: GameClientProps) {
     await rerollDeceasedAttribute(gameState.id, playerId);
   };
 
+  const handleDeleteGame = async () => {
+    if (!gameState || !isEstateKeeper) return;
+    const success = await deleteGame(gameState.id, playerId);
+    if (success) {
+      // Navigate back to home page after successful deletion
+      router.push('/');
+    } else {
+      alert('Failed to delete the game. Please try again.');
+    }
+  };
+
   const navigateToPlayer = (direction: 'prev' | 'next') => {
     if (!gameState || !isEstateKeeper) return;
     
@@ -339,7 +350,7 @@ export default function GameClient({ gameCode }: GameClientProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex justify-center items-center min-h-screen">
         <div className="text-2xl text-amber-300">Loading game...</div>
       </div>
     );
@@ -347,11 +358,11 @@ export default function GameClient({ gameCode }: GameClientProps) {
 
   if (error || !gameState) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <div className="text-2xl text-red-400 mb-4">{error || 'Game not found'}</div>
+      <div className="flex flex-col justify-center items-center p-4 min-h-screen">
+        <div className="mb-4 text-2xl text-red-400">{error || 'Game not found'}</div>
         <button
           onClick={() => router.push('/')}
-          className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg"
+          className="px-6 py-2 text-white bg-amber-600 rounded-lg hover:bg-amber-700"
         >
           Return Home
         </button>
@@ -364,14 +375,17 @@ export default function GameClient({ gameCode }: GameClientProps) {
   const selectedPlayerForCards = nonEstateKeeperPlayers[selectedPlayerIndex];
 
   return (
-    <div className="min-h-screen p-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="p-4 min-h-screen">
+      <div className="mx-auto max-w-7xl">
         <GameHeader 
           gameCode={gameState.game_code}
+          gameStatus={gameState.status}
           showRules={showRules}
           setShowRules={setShowRules}
           showEventsLog={showEventsLog}
           setShowEventsLog={setShowEventsLog}
+          isEstateKeeper={isEstateKeeper}
+          onDeleteGame={handleDeleteGame}
         />
 
         <GameRules 
@@ -385,7 +399,7 @@ export default function GameClient({ gameCode }: GameClientProps) {
           gameState={gameState}
         />
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid gap-8 lg:grid-cols-3">
           {/* Left Column - Game Info & Controls */}
           <div className="space-y-6">
             <DeceasedInfo 
@@ -413,12 +427,14 @@ export default function GameClient({ gameCode }: GameClientProps) {
 
           {/* Middle Column - Player Cards */}
           {gameState.status === 'playing' && (
-            <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-amber-500/20">
+            <div>
               {!isEstateKeeper && currentPlayer?.cards ? (
-                <PlayerCards 
-                  player={currentPlayer}
-                  title="🎴 Your Cards 🎴"
-                />
+                <div className="p-6 funeral-card-ornate">
+                  <PlayerCards 
+                    player={currentPlayer}
+                    title="🎴 Your Cards 🎴"
+                  />
+                </div>
               ) : (
                 isEstateKeeper && selectedPlayerForCards && (
                   <PlayerCards 
@@ -436,32 +452,32 @@ export default function GameClient({ gameCode }: GameClientProps) {
           {/* Right Column - Game Status, Host Controls & Leaderboard */}
           <div className="space-y-6">
             {/* Game Status */}
-            <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-amber-500/20">
-              <h3 className="text-xl font-bold text-amber-300 mb-4 text-center">Game Status</h3>
-              <div className="text-center space-y-2">
+            <div className="p-6 funeral-card">
+              <h3 className="text-xl font-bold text-funeral-gold mb-4 text-center font-['Cinzel']">⚖️ Estate Status</h3>
+              <div className="space-y-2 text-center">
                 {gameState.status === 'waiting' && (
-                  <div className="text-amber-200">
+                  <div className="text-funeral-silver">
                     {isHost ? 'Select an Estate Keeper to start' : 'Waiting for host to start...'}
                   </div>
                 )}
                 {gameState.status === 'playing' && (
                   <div className="space-y-2">
-                    <div className="text-green-200">
+                    <div className="font-semibold text-funeral-gold">
                       Round {gameState.current_round} of {gameState.max_rounds}: {ROUND_NAMES[gameState.current_round as keyof typeof ROUND_NAMES] || 'Unknown Round'}
                     </div>
                     {estateKeeper && (
-                      <div className="text-purple-200">
-                        Estate Keeper: <span className="font-bold">{estateKeeper.name}</span> ⚖️
+                      <div className="text-funeral-silver">
+                        Estate Keeper: <span className="font-bold text-funeral-gold">{estateKeeper.name}</span> ⚖️
                       </div>
                     )}
                     {currentTurnPlayer && (
-                      <div className="text-blue-200">
-                        Current Turn: <span className="font-bold text-blue-300">{currentTurnPlayer.name}</span>
+                      <div className="text-funeral-silver">
+                        Current Turn: <span className="font-bold text-funeral-gold">{currentTurnPlayer.name}</span>
                         {isMyTurn && !isEstateKeeper && (
                           <div className="mt-2">
                             <button
                               onClick={handleEndTurn}
-                              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                              className="px-4 py-2 text-sm funeral-button"
                             >
                               End My Turn
                             </button>
@@ -476,15 +492,15 @@ export default function GameClient({ gameCode }: GameClientProps) {
 
             {/* Host Controls */}
             {isHost && gameState.status === 'waiting' && (
-              <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-amber-500/20">
-                <h3 className="text-xl font-bold text-amber-300 mb-4">Host Controls</h3>
+              <div className="p-6 funeral-card">
+                <h3 className="text-xl font-bold text-funeral-gold mb-4 font-['Cinzel']">👑 Host Controls</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-amber-200 mb-2">Select Estate Keeper:</label>
+                    <label className="block text-funeral-silver mb-2 font-['Cinzel']">Select Estate Keeper:</label>
                     <select
                       value={selectedPlayer}
                       onChange={(e) => setSelectedPlayer(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-amber-500/30 text-amber-50"
+                      className="px-3 py-2 w-full rounded-lg border-2 transition-colors duration-300 bg-funeral-black/50 border-funeral-gold/50 text-funeral-bone focus:border-funeral-gold focus:outline-none"
                     >
                       <option value="">Choose player...</option>
                       {gameState.players.map(player => (
@@ -497,7 +513,7 @@ export default function GameClient({ gameCode }: GameClientProps) {
                   <button
                     onClick={() => selectedPlayer && handleSetEstateKeeper(selectedPlayer)}
                     disabled={!selectedPlayer}
-                    className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                    className="w-full funeral-button disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Set Estate Keeper
                   </button>
@@ -506,9 +522,9 @@ export default function GameClient({ gameCode }: GameClientProps) {
             )}
 
             {/* Leaderboard */}
-            <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-amber-500/20">
-              <h3 className="text-2xl font-bold text-amber-300 mb-6 text-center">
-                🏆 Leaderboard
+            <div className="p-6 funeral-card">
+              <h3 className="text-2xl font-bold text-funeral-gold mb-6 text-center font-['Cinzel']">
+                🏆 Inheritance Leaderboard
               </h3>
               
               <div className="space-y-3">
@@ -517,40 +533,40 @@ export default function GameClient({ gameCode }: GameClientProps) {
                   .map((player, index) => (
                   <div
                     key={player.id}
-                    className={`p-3 rounded-lg border ${
+                    className={`p-3 rounded-lg border-2 ${
                       index === 0 && player.score > 0
-                        ? 'border-amber-400 bg-amber-900/20'
+                        ? 'border-funeral-gold bg-funeral-gold/10'
                         : currentTurnPlayer?.id === player.id
                         ? 'border-blue-400 bg-blue-900/20'
-                        : 'border-gray-400 bg-gray-900/20'
+                        : 'border-funeral-silver/50 bg-funeral-black/30'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="text-lg font-bold text-amber-200">
+                    <div className="flex justify-between items-center">
+                      <div className="flex gap-2 items-center">
+                        <div className="text-lg font-bold text-funeral-gold">
                           #{index + 1}
                         </div>
                         <div>
-                          <div className="font-bold">
+                          <div className="font-bold text-funeral-bone">
                             {player.name}
-                            {player.is_host && <span className="text-amber-300 ml-1">👑</span>}
+                            {player.is_host && <span className="ml-1 text-funeral-gold">👑</span>}
                             {currentTurnPlayer?.id === player.id && gameState.status === 'playing' && (
-                              <span className="text-blue-300 ml-1">🔵</span>
+                              <span className="ml-1 text-blue-300">🔵</span>
                             )}
-                            {player.id === playerId && <span className="text-green-300 ml-1">(You)</span>}
+                            {player.id === playerId && <span className="ml-1 text-funeral-gold">(You)</span>}
                           </div>
                           {gameState.status === 'playing' && player.cards && player.id !== playerId && !isEstateKeeper && (
-                            <div className="text-xs text-gray-400">
+                            <div className="text-xs text-funeral-silver/70">
                               {player.cards.identity ? 1 : 0}I, {player.cards.relationship ? 1 : 0}R, {(player.cards.backstory || []).length}B, {((player.cards as any).objections || []).length}O
                             </div>
                           )}
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-lg font-bold text-amber-200">
+                        <div className="text-lg font-bold text-funeral-gold">
                           {player.score}
                         </div>
-                        <div className="text-xs text-gray-400">points</div>
+                        <div className="text-xs text-funeral-silver/70">points</div>
                       </div>
                     </div>
                   </div>
