@@ -65,7 +65,7 @@ export default function GameHeader({
   return (
     <>
       <div className="text-center mb-8 animate-fade-in-up">
-        <h1 className="funeral-title text-4xl md:text-5xl mb-4">
+        <h1 className="funeral-title text-4xl md:text-5xl mb-4 whitespace-nowrap">
           ⚰️ SOMEBODY HAS DIED ⚰️
         </h1>
         

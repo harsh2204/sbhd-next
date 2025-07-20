@@ -67,7 +67,7 @@ export default function HomePage() {
       <div className="w-full funeral-container">
         {/* Header */}
         <div className="mb-16 text-center">
-          <h1 className="mb-6 funeral-title animate-ornate-glow">
+          <h1 className="mb-6 funeral-title animate-ornate-glow whitespace-nowrap">
             ⚰️ SOMEBODY HAS DIED ⚰️
           </h1>
           <p className="mb-8 funeral-subtitle">
